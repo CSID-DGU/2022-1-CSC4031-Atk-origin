@@ -10,7 +10,7 @@
 ## 기술 스택
 
 ### Frontent
-- React
+- JavaScript
 
 ### Backend
 - JAVA
