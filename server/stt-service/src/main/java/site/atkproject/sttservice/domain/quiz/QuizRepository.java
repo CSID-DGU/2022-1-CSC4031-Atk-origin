@@ -1,6 +1,6 @@
 package site.atkproject.sttservice.domain.quiz;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface QuizRepository extends MongoRepository<Quiz, String> {
+public interface QuizRepository extends JpaRepository<Quiz, Long> {
 }
