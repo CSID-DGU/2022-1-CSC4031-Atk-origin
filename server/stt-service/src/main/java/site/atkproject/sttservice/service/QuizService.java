@@ -15,7 +15,7 @@ public class QuizService {
 
     private final QuizRepository quizRepository;
 
-    public Quiz getQuiz(String id) {
+    public Quiz getQuiz(Long id) {
         return quizRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("찾을 수 없음"));
     }
 
@@ -26,9 +26,4 @@ public class QuizService {
     public Quiz saveQuiz(Quiz quiz) {
         return quizRepository.save(quiz);
     }
-
-    public Quiz insertQuiz(Quiz quiz) {
-        return quizRepository.insert(quiz);
-    }
-
 }
