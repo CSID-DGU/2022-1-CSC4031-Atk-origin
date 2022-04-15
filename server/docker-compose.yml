@@ -1,9 +1,17 @@
 # 파일 규격 버전
 version: "3"
 # 이 항목 밑에 실행하려는 컨테이너 들을 정의
-services: 
+services:
+  server:
+    image: atk-server
+    build: .
+    container_name: atk-ubuntu
+    stdin_open: true
+    tty: true
+    entrypoint: /bin/bash
+  
   # 서비스 명
-  mariadb:
+  database:
     # 사용할 이미지
     image: mariadb
     # 컨테이너 실행 시 재시작
