@@ -22,7 +22,3 @@
 - /api/stt: stt 작업 요청
 - /api/summarization: 요약 요청
 - /api/quiz: 퀴즈 요청
-
-
-## docker-compose.yml 사용법
-> docker-compose up -d
