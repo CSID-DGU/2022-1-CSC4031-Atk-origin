@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,6 +28,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
+    private final JwtProperties jwtProperties;
     private final AuthenticationManager authenticationManager;
 
     @Override
@@ -52,13 +55,15 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         PrincipalDetails principalDetails = (PrincipalDetails) authResult.getPrincipal();
 
+        log.info("{} {} {}", jwtProperties.getSubject(), jwtProperties.getExpireTime(), jwtProperties.getHashKey());
+
         String jwtToken = JWT.create()
-                .withSubject("atk")
-                .withExpiresAt(new Date(System.currentTimeMillis() + (1000 * 600)))
+                .withSubject(jwtProperties.getSubject())
+                .withExpiresAt(new Date(System.currentTimeMillis() + jwtProperties.getExpireTime()))
                 .withClaim("id", principalDetails.getUser().getId())
                 .withClaim("username", principalDetails.getUser().getUsername())
-                .sign(Algorithm.HMAC512("secret"));
+                .sign(Algorithm.HMAC512(jwtProperties.getHashKey()));
 
-        response.addHeader("Authorization", JwtProperties.TOKEN_PREFIX + jwtToken);
+        response.addHeader("Authorization", jwtProperties.getTOKEN_PREFIX() + jwtToken);
     }
 }
