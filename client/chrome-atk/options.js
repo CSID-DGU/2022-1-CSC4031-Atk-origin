@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     muteTab: false,
     maxTime: 10000,
     format: "wav",
-    quality: 192,
+    quality: 96,
     limitRemoved: false
   }, (options) => {
     mute.checked = options.muteTab;

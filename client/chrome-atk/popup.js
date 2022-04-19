@@ -128,18 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
   startButton.onclick = () => {chrome.runtime.sendMessage("startCapture")};
   finishButton.onclick = () => {chrome.runtime.sendMessage("stopCapture")};
   cancelButton.onclick = () => {chrome.runtime.sendMessage("cancelCapture")};
-  chrome.runtime.getPlatformInfo((info) => {
-    if(info.os === "mac") {
-      startKey.innerHTML = "Command + Shift + U to start capture on current tab";
-      endKey.innerHTML = "Command + Shift + X to stop capture on current tab";
-    } else {
-      startKey.innerHTML = "Ctrl + Shift + S to start capture on current tab";
-      endKey.innerHTML = "Ctrl + Shift + X to stop capture on current tab";
-    }
-  })
-  const options = document.getElementById("options");
-  options.onclick = () => {chrome.runtime.openOptionsPage()};
-  const git = document.getElementById("GitHub");
-  git.onclick = () => {chrome.tabs.create({url: "https://github.com/arblast/Chrome-Audio-Capturer"})};
+  const version = document.getElementById("version");
+  version.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
 
 });
