@@ -1,4 +1,4 @@
-package site.atkproject.sttservice.web.controller;
+package site.atkproject.sttservice.web.api;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
