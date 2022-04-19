@@ -15,14 +15,14 @@ const displayStatus = function() { //function to handle the display of time and 
       chrome.runtime.sendMessage({currentTab: tabs[0].id}, (response) => {
         if(response) {
           chrome.storage.sync.get({
-            maxTime: 1200000,
+            maxTime: 10000,
             limitRemoved: false
           }, (options) => {
-            if(options.maxTime > 1200000) {
+            if(options.maxTime > 10000) {
               chrome.storage.sync.set({
-                maxTime: 1200000
+                maxTime: 10000
               });
-              timeLeft = 1200000 - (Date.now() - response)
+              timeLeft = 10000 - (Date.now() - response)
             } else {
               timeLeft = options.maxTime - (Date.now() - response)
             }
@@ -77,14 +77,14 @@ chrome.runtime.onMessage.addListener((request, sender) => {
     const cancelButton = document.getElementById('cancel');
     if(request.captureStarted && request.captureStarted === tabs[0].id) {
       chrome.storage.sync.get({
-        maxTime: 1200000,
+        maxTime: 10000,
         limitRemoved: false
       }, (options) => {
-        if(options.maxTime > 1200000) {
+        if(options.maxTime > 10000) {
           chrome.storage.sync.set({
-            maxTime: 1200000
+            maxTime: 10000
           });
-          timeLeft = 1200000 - (Date.now() - request.startTime)
+          timeLeft = 10000 - (Date.now() - request.startTime)
         } else {
           timeLeft = options.maxTime - (Date.now() - request.startTime)
         }

@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
   //initial settings
   chrome.storage.sync.get({
     muteTab: false,
-    maxTime: 1200000,
-    format: "mp3",
+    maxTime: 10000,
+    format: "wav",
     quality: 192,
     limitRemoved: false
   }, (options) => {

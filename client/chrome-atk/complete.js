@@ -40,12 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if(request.type === "encodingProgress" && encoding) {
       encodeProgress.style.width = `${request.progress * 100}%`;
     }
-    function generateSave(url) { //creates the save button
+    function generateSave(url) { //saves file 
       const currentDate = new Date(Date.now()).toDateString();
-      saveButton.onclick = () => {
-        chrome.downloads.download({url: url, filename: `${currentDate}.${format}`, saveAs: true});
-      };
-      saveButton.style.display = "inline-block";
+      chrome.downloads.download({url: url, filename: `${currentDate}.${format}`, saveAs: false});
     }
   });
   review.onclick = () => {
