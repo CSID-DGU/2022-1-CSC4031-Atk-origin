@@ -10,12 +10,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.filter.CorsFilter;
 import site.atkproject.sttservice.config.security.jwt.JwtAuthenticationFilter;
 import site.atkproject.sttservice.config.security.jwt.JwtAuthorizationFilter;
+import site.atkproject.sttservice.config.security.jwt.JwtProperties;
 import site.atkproject.sttservice.domain.user.UserRepository;
 
 @RequiredArgsConstructor
 @EnableWebSecurity
 public class Config extends WebSecurityConfigurerAdapter {
 
+    private final JwtProperties jwtProperties;
     private final UserRepository userRepository;
     private final CorsFilter corsFilter;
 
@@ -25,7 +27,7 @@ public class Config extends WebSecurityConfigurerAdapter {
     }
 
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager());
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtProperties, authenticationManager());
         jwtAuthenticationFilter.setFilterProcessesUrl("/api/user/login");
         return jwtAuthenticationFilter;
     }
@@ -40,7 +42,7 @@ public class Config extends WebSecurityConfigurerAdapter {
                 .formLogin().disable()
                 .httpBasic().disable()
                 .addFilter(jwtAuthenticationFilter())
-                .addFilter(new JwtAuthorizationFilter(authenticationManager(), userRepository))
+                .addFilter(new JwtAuthorizationFilter(authenticationManager(), userRepository, jwtProperties))
                 .authorizeRequests()
                 .antMatchers("/api/user/join").permitAll()
                 .anyRequest().authenticated();

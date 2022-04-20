@@ -4,10 +4,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import site.atkproject.sttservice.domain.lecture.Lecture;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Getter
 @NoArgsConstructor
@@ -17,10 +16,14 @@ public class Quiz {
 
     @Id
     @GeneratedValue
+    @Column(name = "quiz_id")
     private Long id;
 
     private String word;
     private String meaning;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Lecture lecture;
 
     @Builder
     public Quiz(String word, String meaning) {

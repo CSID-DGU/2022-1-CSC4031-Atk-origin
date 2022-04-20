@@ -1,4 +1,4 @@
-package site.atkproject.sttservice.web.controller;
+package site.atkproject.sttservice.web.api;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

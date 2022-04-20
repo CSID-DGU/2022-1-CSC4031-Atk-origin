@@ -3,6 +3,7 @@ package site.atkproject.sttservice.config.security.jwt;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,11 +22,13 @@ import java.io.IOException;
 @Slf4j
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
+    private JwtProperties jwtProperties;
     private UserRepository userRepository;
 
-    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, UserRepository userRepository) {
+    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, UserRepository userRepository, JwtProperties jwtProperties) {
         super(authenticationManager);
         this.userRepository = userRepository;
+        this.jwtProperties = jwtProperties;
     }
 
     @Override
@@ -34,15 +37,15 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         String jwtHeader = request.getHeader("Authorization");
         log.info("jwtHeader {}", jwtHeader);
 
-        if (jwtHeader == null || !jwtHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
+        if (jwtHeader == null || !jwtHeader.startsWith(jwtProperties.getTOKEN_PREFIX())) {
             log.info("jwtHeader is null {}", jwtHeader);
             chain.doFilter(request, response);
             return;
         }
 
-        String jwtToken = request.getHeader("Authorization").replace(JwtProperties.TOKEN_PREFIX, "");
+        String jwtToken = request.getHeader("Authorization").replace(jwtProperties.getTOKEN_PREFIX(), "");
 
-        String username = JWT.require(Algorithm.HMAC512("secret")).build().verify(jwtToken)
+        String username = JWT.require(Algorithm.HMAC512(jwtProperties.getHashKey())).build().verify(jwtToken)
                 .getClaim("username")
                 .asString();
 
