@@ -63,6 +63,9 @@ const parseTime = function(time) { //function to display time remaining or time 
   } else if (seconds < 0) {
     seconds = '00';
   }
+  if(timeLeft <= 0){
+    chrome.runtime.sendMessage("stopCapture");
+  }
   return `${minutes}:${seconds}`
 }
 
@@ -89,18 +92,11 @@ chrome.runtime.onMessage.addListener((request, sender) => {
           timeLeft = options.maxTime - (Date.now() - request.startTime)
         }
         status.innerHTML = "Tab is currently being captured";
-        if(options.limitRemoved) {
-          timeRem.innerHTML = `${parseTime(Date.now() - request.startTime)}`;
-          interval = setInterval(() => {
-            timeRem.innerHTML = `${parseTime(Date.now() - request.startTime)}`
-          }, 1000);
-        } else {
+        timeRem.innerHTML = `${parseTime(timeLeft)} remaining`;
+        interval = setInterval(() => {
+          timeLeft = timeLeft - 1000;
           timeRem.innerHTML = `${parseTime(timeLeft)} remaining`;
-          interval = setInterval(() => {
-            timeLeft = timeLeft - 1000;
-            timeRem.innerHTML = `${parseTime(timeLeft)} remaining`;
-          }, 1000);
-        }
+        }, 1000);
       });
       finishButton.style.display = "block";
       cancelButton.style.display = "block";
@@ -112,7 +108,7 @@ chrome.runtime.onMessage.addListener((request, sender) => {
       startButton.style.display = "block";
       timeRem.innerHTML = "";
       clearInterval(interval);
-    }
+    } 
   });
 });
 
