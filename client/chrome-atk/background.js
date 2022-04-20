@@ -24,7 +24,7 @@ const CONFIGS = {
 
   // runtime options
   options: {
-    timeLimit: 1200,           // recording time limit (sec)
+    timeLimit: 10,           // recording time limit (sec)
     encodeAfterRecord: true, // process encoding after recording
     progressInterval: 1000,   // encoding progress report interval (millisec)
     bufferSize: undefined,    // buffer size (use browser default)
@@ -192,18 +192,25 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
         }
       }
     }
+    function generateSave(url) { //saves file 
+      const currentDate = new Date(Date.now()).toDateString();
+      chrome.downloads.download({url: url, filename: `${currentDate}.${format}`, saveAs: false});
+    }
     chrome.commands.onCommand.addListener(onStopCommand);
     chrome.runtime.onMessage.addListener(onStopClick);
     mediaRecorder.onComplete = (recorder, blob) => {
       audioURL = window.URL.createObjectURL(blob);
       if(completeTabID) {
         chrome.tabs.sendMessage(completeTabID, {type: "encodingComplete", audioURL});
+        generateSave(audioURL);
+        console.log('encoding complete');
       }
       mediaRecorder = null;
     }
     mediaRecorder.onEncodingProgress = (recorder, progress) => {
       if(completeTabID) {
         chrome.tabs.sendMessage(completeTabID, {type: "encodingProgress", progress: progress});
+        console.log('encoding in progress');
       }
     }
 
@@ -214,13 +221,14 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
         endTabId = tabs[0].id;
         if(mediaRecorder && startTabId === endTabId){
           mediaRecorder.finishRecording();
-          chrome.tabs.create({url: "complete.html"}, (tab) => {
-            completeTabID = tab.id;
-            let completeCallback = () => {
-              chrome.tabs.sendMessage(tab.id, {type: "createTab", format: format, audioURL, startID: startTabId});
-            }
-            setTimeout(completeCallback, 500);
-          });
+          completeTabID = tabs[0].id;
+          // chrome.tabs.create({url: "complete.html"}, (tab) => {
+          //   completeTabID = tab.id;
+          //   let completeCallback = () => {
+          //     chrome.tabs.sendMessage(tab.id, {type: "createTab", format: format, audioURL, startID: startTabId});
+          //   }
+          //   setTimeout(completeCallback, 500);
+          // });          
           closeStream(endTabId);
         }
       })
@@ -280,15 +288,15 @@ const startCapture = function() {
       if(!sessionStorage.getItem(tabs[0].id)) {
         sessionStorage.setItem(tabs[0].id, Date.now());
         chrome.storage.sync.get({
-          maxTime: 1200000,
+          maxTime: 10000,
           muteTab: false,
           format: "wav",
           quality: 192,
           limitRemoved: false
         }, (options) => {
           let time = options.maxTime;
-          if(time > 1200000) {
-            time = 1200000
+          if(time > 10000) {
+            time = 10000
           }
           audioCapture(time, options.muteTab, options.format, options.quality, options.limitRemoved);
         });
