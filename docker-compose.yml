@@ -2,9 +2,16 @@
 version: "3"
 # 이 항목 밑에 실행하려는 컨테이너 들을 정의
 services:
+  web:
+    image: nginx
+    ports: 
+      - 80:80
+    volumes: 
+      - ./nginx/conf.d:/etc/nginx/conf.d
+
   server:
     image: atk-server
-    build: .
+    build: ./docker/server
     container_name: atk-ubuntu
     stdin_open: true
     tty: true
@@ -20,7 +27,7 @@ services:
     container_name: atk-mysql
     # 접근 포트 설정 (컨테이너 외부:컨테이너 내부)
     ports:
-      - "3306:3306"
+      - "3307:3306"
     # -e 옵션
     environment: 
       # MongoDB 계정 및 패스워드 설정 옵션
@@ -33,3 +40,15 @@ services:
     volumes:
       # -v 옵션 (다렉토리 마운트 설정)
       - ~/data/mysql-db:/var/lib/mysql
+  
+  spring:
+    image: hsj4665/atk-spring 
+    container_name: atk-spring
+    ports:
+      - 8080:8080
+    depends_on:
+      - database
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://database:3306/atk?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: atk123!
