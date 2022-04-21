@@ -15,14 +15,14 @@ const displayStatus = function() { //function to handle the display of time and 
       chrome.runtime.sendMessage({currentTab: tabs[0].id}, (response) => {
         if(response) {
           chrome.storage.sync.get({
-            maxTime: 1200000,
+            maxTime: 10000,
             limitRemoved: false
           }, (options) => {
-            if(options.maxTime > 1200000) {
+            if(options.maxTime > 10000) {
               chrome.storage.sync.set({
-                maxTime: 1200000
+                maxTime: 10000
               });
-              timeLeft = 1200000 - (Date.now() - response)
+              timeLeft = 10000 - (Date.now() - response)
             } else {
               timeLeft = options.maxTime - (Date.now() - response)
             }
@@ -63,6 +63,9 @@ const parseTime = function(time) { //function to display time remaining or time 
   } else if (seconds < 0) {
     seconds = '00';
   }
+  if(timeLeft <= 0){
+    chrome.runtime.sendMessage("stopCapture");
+  }
   return `${minutes}:${seconds}`
 }
 
@@ -77,30 +80,23 @@ chrome.runtime.onMessage.addListener((request, sender) => {
     const cancelButton = document.getElementById('cancel');
     if(request.captureStarted && request.captureStarted === tabs[0].id) {
       chrome.storage.sync.get({
-        maxTime: 1200000,
+        maxTime: 10000,
         limitRemoved: false
       }, (options) => {
-        if(options.maxTime > 1200000) {
+        if(options.maxTime > 10000) {
           chrome.storage.sync.set({
-            maxTime: 1200000
+            maxTime: 10000
           });
-          timeLeft = 1200000 - (Date.now() - request.startTime)
+          timeLeft = 10000 - (Date.now() - request.startTime)
         } else {
           timeLeft = options.maxTime - (Date.now() - request.startTime)
         }
         status.innerHTML = "Tab is currently being captured";
-        if(options.limitRemoved) {
-          timeRem.innerHTML = `${parseTime(Date.now() - request.startTime)}`;
-          interval = setInterval(() => {
-            timeRem.innerHTML = `${parseTime(Date.now() - request.startTime)}`
-          }, 1000);
-        } else {
+        timeRem.innerHTML = `${parseTime(timeLeft)} remaining`;
+        interval = setInterval(() => {
+          timeLeft = timeLeft - 1000;
           timeRem.innerHTML = `${parseTime(timeLeft)} remaining`;
-          interval = setInterval(() => {
-            timeLeft = timeLeft - 1000;
-            timeRem.innerHTML = `${parseTime(timeLeft)} remaining`;
-          }, 1000);
-        }
+        }, 1000);
       });
       finishButton.style.display = "block";
       cancelButton.style.display = "block";
@@ -112,7 +108,7 @@ chrome.runtime.onMessage.addListener((request, sender) => {
       startButton.style.display = "block";
       timeRem.innerHTML = "";
       clearInterval(interval);
-    }
+    } 
   });
 });
 
@@ -128,18 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
   startButton.onclick = () => {chrome.runtime.sendMessage("startCapture")};
   finishButton.onclick = () => {chrome.runtime.sendMessage("stopCapture")};
   cancelButton.onclick = () => {chrome.runtime.sendMessage("cancelCapture")};
-  chrome.runtime.getPlatformInfo((info) => {
-    if(info.os === "mac") {
-      startKey.innerHTML = "Command + Shift + U to start capture on current tab";
-      endKey.innerHTML = "Command + Shift + X to stop capture on current tab";
-    } else {
-      startKey.innerHTML = "Ctrl + Shift + S to start capture on current tab";
-      endKey.innerHTML = "Ctrl + Shift + X to stop capture on current tab";
-    }
-  })
-  const options = document.getElementById("options");
-  options.onclick = () => {chrome.runtime.openOptionsPage()};
-  const git = document.getElementById("GitHub");
-  git.onclick = () => {chrome.tabs.create({url: "https://github.com/arblast/Chrome-Audio-Capturer"})};
+  const version = document.getElementById("version");
+  version.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
 
 });
