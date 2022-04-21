@@ -161,7 +161,6 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
   chrome.tabCapture.capture({audio: true}, (stream) => { // sets up stream for capture
     let startTabId; //tab when the capture is started
     let timeout;
-    let completeTabID; //tab when the capture is stopped
     let audioURL = null; //resulting object when encoding is completed
     chrome.tabs.query({active:true, currentWindow: true}, (tabs) => startTabId = tabs[0].id) //saves start tab
     const liveStream = stream;
@@ -200,18 +199,10 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
     chrome.runtime.onMessage.addListener(onStopClick);
     mediaRecorder.onComplete = (recorder, blob) => {
       audioURL = window.URL.createObjectURL(blob);
-      if(completeTabID) {
-        chrome.tabs.sendMessage(completeTabID, {type: "encodingComplete", audioURL});
-        generateSave(audioURL);
-        console.log('encoding complete');
-      }
+      generateSave(audioURL);
       mediaRecorder = null;
     }
     mediaRecorder.onEncodingProgress = (recorder, progress) => {
-      if(completeTabID) {
-        chrome.tabs.sendMessage(completeTabID, {type: "encodingProgress", progress: progress});
-        console.log('encoding in progress');
-      }
     }
 
     const stopCapture = function() {
@@ -220,15 +211,7 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
         endTabId = tabs[0].id;
         if(mediaRecorder && startTabId === endTabId){
-          mediaRecorder.finishRecording();
-          completeTabID = tabs[0].id;
-          // chrome.tabs.create({url: "complete.html"}, (tab) => {
-          //   completeTabID = tab.id;
-          //   let completeCallback = () => {
-          //     chrome.tabs.sendMessage(tab.id, {type: "createTab", format: format, audioURL, startID: startTabId});
-          //   }
-          //   setTimeout(completeCallback, 500);
-          // });          
+          mediaRecorder.finishRecording();  
           closeStream(endTabId);
         }
       })
@@ -291,7 +274,7 @@ const startCapture = function() {
           maxTime: 10000,
           muteTab: false,
           format: "wav",
-          quality: 192,
+          quality: 96,
           limitRemoved: false
         }, (options) => {
           let time = options.maxTime;
@@ -306,6 +289,37 @@ const startCapture = function() {
   });
 };
 
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request === "login") {
+    loginRequest("heesu", "1234");
+  }
+});
+
+const loginRequest = function(username, pwd) {
+  //e.preventDefault();
+  console.log("start");
+  //var data = $.toJSON({'username': username, 'password': pwd});
+
+  const req = new XMLHttpRequest();
+  //const baseUrl = "https://cors-anywhere.herokuapp.com/http://localhost/api/user/login";
+  const baseUrl = "http://localhost/api/user/login";
+
+  //const urlParams = `username=${username}&password=${pwd}`;
+  ///const urlParams =JSON.stringify({"username": username,"pwd": pwd});
+  req.open("POST", baseUrl, true);
+  req.setRequestHeader("Content-type", "application/json");
+  //;charset=utf-8
+  req.send(JSON.stringify({username: "heesu", password: "1234"}));
+
+  req.onreadystatechange = function() { // Call a function when the state changes.
+      if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+          console.log("Got response 200!");
+      }
+      else{
+        console.log("failed " + req.responseText + req.request);
+      }
+  }
+}
 
 chrome.commands.onCommand.addListener((command) => {
   if (command === "start") {
