@@ -3,8 +3,8 @@ package site.atkproject.sttservice.service.translate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.python.antlr.ast.Str;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -14,8 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 // 네이버 기계번역 (Papago SMT) API 예제
-@Service
-public class TranslationServiceImpl implements TranslationService {
+@Component
+public class TranslationImpl implements Translation {
 
     @Value("${papago.id}")
     private String papagoId;
@@ -95,9 +95,5 @@ public class TranslationServiceImpl implements TranslationService {
         } catch (IOException e) {
             throw new RuntimeException("API 응답을 읽는데 실패했습니다.", e);
         }
-    }
-
-    static class PaPaGoDTO {
-        Map<String, Map<String, String>> message;
     }
 }
