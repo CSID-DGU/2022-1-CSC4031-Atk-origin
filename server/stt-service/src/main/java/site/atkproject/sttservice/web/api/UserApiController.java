@@ -7,7 +7,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import site.atkproject.sttservice.domain.user.User;
 import site.atkproject.sttservice.domain.user.UserRepository;
+import site.atkproject.sttservice.exception.UserException;
+import site.atkproject.sttservice.service.UserService;
 import site.atkproject.sttservice.web.dto.UserDto;
+import site.atkproject.sttservice.web.dto.user.JoinUserDto;
 
 import java.util.List;
 
@@ -17,21 +20,16 @@ import java.util.List;
 @RequestMapping("/api/user")
 public class UserApiController {
 
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UserService userService;
 
     @PostMapping("/join")
-    public String join(@RequestBody UserDto userDto) {
-
-        userDto.setPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));
-        User user = userDto.toEntity();
-        userRepository.save(user);
-        return "join";
-    }
-
-    @GetMapping("/all")
-    public List<User> all() {
-        List<User> users = userRepository.findAll();
-        return users;
+    public JoinUserDto join(@RequestBody UserDto userDto) {
+        JoinUserDto joinUserDto = JoinUserDto.builder().username(userDto.getUsername()).build();
+        boolean isSave = userService.joinUser(userDto);
+        if (!isSave) {
+            throw new UserException();
+        }
+        joinUserDto.setMessage("회원 가입을 축하합니다.");
+        return joinUserDto;
     }
 }

@@ -1,0 +1,17 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+  profiles:
+    include:
+      - API-KEY
+      - DB
+    active: prod
+
+  jpa:
+    database-platform: org.hibernate.dialect.MariaDB103Dialect
+    hibernate:
+      ddl-auto: none
+
+file:
+  dir: /Users/seokjuhong/study/file/
