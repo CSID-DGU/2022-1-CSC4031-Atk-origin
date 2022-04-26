@@ -1,0 +1,15 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  jpa:
+    database-platform: org.hibernate.dialect.MariaDB103Dialect
+    hibernate:
+      ddl-auto: create
+
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: ${local.url}
+    username: ${local.username}
+    password: ${local.password}
