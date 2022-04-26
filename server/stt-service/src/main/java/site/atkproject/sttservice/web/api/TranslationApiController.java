@@ -5,18 +5,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import site.atkproject.sttservice.domain.lecture.Lecture;
 import site.atkproject.sttservice.domain.lecture.LectureRepository;
-import site.atkproject.sttservice.service.translate.TranslationService;
+import site.atkproject.sttservice.service.translate.Translation;
 import site.atkproject.sttservice.web.dto.TranslationRequestDto;
 
 import java.util.Optional;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/summarization")
+@RequestMapping("/api/translation")
 public class TranslationApiController {
 
     private final LectureRepository lectureRepository;
-    private final TranslationService translationService;
+    private final Translation translationService;
 
     @GetMapping("")
     public String all() {
