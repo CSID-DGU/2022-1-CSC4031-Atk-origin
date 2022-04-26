@@ -27,7 +27,7 @@ public class UserApiController {
         JoinUserDto joinUserDto = JoinUserDto.builder().username(userDto.getUsername()).build();
         boolean isSave = userService.joinUser(userDto);
         if (!isSave) {
-            throw new UserException("이미 존재하는 회원입니다.", userDto.getUsername());
+            throw new UserException();
         }
         joinUserDto.setMessage("회원 가입을 축하합니다.");
         return joinUserDto;

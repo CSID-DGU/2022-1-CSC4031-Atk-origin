@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.filter.CorsFilter;
+import site.atkproject.sttservice.config.security.exception.CustomAuthenticationEntryPoint;
 import site.atkproject.sttservice.config.security.jwt.JwtAuthenticationFilter;
 import site.atkproject.sttservice.config.security.jwt.JwtAuthorizationFilter;
 import site.atkproject.sttservice.config.security.jwt.JwtProperties;
@@ -44,7 +45,10 @@ public class Config extends WebSecurityConfigurerAdapter {
                 .addFilter(jwtAuthenticationFilter())
                 .addFilter(new JwtAuthorizationFilter(authenticationManager(), userRepository, jwtProperties))
                 .authorizeRequests()
-                .antMatchers("/api/user/join").permitAll()
-                .anyRequest().authenticated();
+                .antMatchers("/api/user/join", "/api/exception/**").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .exceptionHandling()
+                .authenticationEntryPoint(new CustomAuthenticationEntryPoint());
     }
 }
