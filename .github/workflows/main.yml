@@ -17,9 +17,9 @@ jobs:
           java-version: 11 
 
       - name: Grant execute permission for gradlew 
-        run: chmod +x gradlew
+        run: chmod +x server/stt-service/gradlew
         shell: bash 
 
       - name: Build with Gradle 
-        run: ./gradlew build 
+        run: ./server/stt-service/gradlew build 
         shell: bash # 다음 단계에서 스크립트 추가 예정
