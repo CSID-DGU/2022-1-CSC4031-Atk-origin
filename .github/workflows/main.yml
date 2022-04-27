@@ -45,13 +45,30 @@ jobs:
         working-directory: ${{ env.working-directory }}
         shell: bash
         
+      # 디렉토리 생성
+      - name: Make Directory
+        run: mkdir -p deploy
+        working-directory: ${{ env.working-directory }}
+
+      # Jar 파일 복사
+      - name: Copy Jar
+        run: cp ./build/libs/*.jar ./deploy
+        working-directory: ${{ env.working-directory }}
+
+      # 파일 압축
+      - name: Make zip file
+        run: zip -r ./springboor-with-githubaction.zip ./deploy
+        working-directory: ${{ env.working-directory }}
+
+      # Deploy
       - name: Deploy
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: |
-          aws s3 cp \
-            --recursive \
-            --region ap-northeast-2 \
-            build s3://atkproject-bucket
-          
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Upload to S3
+        run: aws s3 cp --region ap-northeast-2 ./springboor-with-githubaction.zip s3://atkproject-bucket/springboot-with-githubaction.zip
+        working-directory: ${{ env.working-directory }}
+
