@@ -27,6 +27,13 @@ jobs:
           spring.datasource.url: ${{ secrets.RDS_URL }}
           spring.datasource.username: ${{ secrets.RDS_USERNAME }}
           spring.datasource.password: ${{ secrets.RDS_PASSWORD }}
+          jwt.hash-key: ${{ secrets.JWT_HASH_KEY }}
+          jwt.expire-time: ${{ secrets.JWT_EXPIRE_TIME }}
+          jwt.subject: ${{ secrets.JWT_SUBJECT }}
+          papago.secret: ${{ secrets.PAPAGO_SECRET }}
+          papgo.id: ${{ secrets.PAPAGO_ID }}
+          oxford.app-id: ${{ secrets.OXFORD_ID }}
+          oxford.app-key: ${{ secrets.OXFORD_KEY }}
 
       - name: Grant execute permission for gradlew 
         run: chmod +x gradlew
