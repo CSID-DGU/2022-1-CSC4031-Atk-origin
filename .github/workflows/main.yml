@@ -43,5 +43,15 @@ jobs:
       - name: Build with Gradle 
         run: ./gradlew build
         working-directory: ${{ env.working-directory }}
-        shell: bash # 다음 단계에서 스크립트 추가 예정
+        shell: bash
+        
+      - name: Deploy
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          aws s3 cp \
+            --recursive \
+            --region ap-northeast-2 \
+            build s3://atkproject-bucket
           
