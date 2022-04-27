@@ -13,3 +13,9 @@ spring:
     url: ${rds.url}
     username: ${rds.username}
     password: ${rds.password}
+
+# JWT 정보
+jwt:
+  hash-key: ${secret.jwt.hash-key}
+  expire-time: ${secret.jwt.expire-time}
+  subject: ${secret.jwt.subject}
