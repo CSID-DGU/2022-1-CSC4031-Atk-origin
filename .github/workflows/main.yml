@@ -31,7 +31,7 @@ jobs:
           jwt.expire-time: ${{ secrets.JWT_EXPIRE_TIME }}
           jwt.subject: ${{ secrets.JWT_SUBJECT }}
           papago.secret: ${{ secrets.PAPAGO_SECRET }}
-          papgo.id: ${{ secrets.PAPAGO_ID }}
+          papago.id: ${{ secrets.PAPAGO_ID }}
           oxford.app-id: ${{ secrets.OXFORD_ID }}
           oxford.app-key: ${{ secrets.OXFORD_KEY }}
 
