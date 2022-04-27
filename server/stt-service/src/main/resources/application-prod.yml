@@ -19,3 +19,12 @@ jwt:
   hash-key: ${secret.jwt.hash-key}
   expire-time: ${secret.jwt.expire-time}
   subject: ${secret.jwt.subject}
+
+# 파파고 API 키
+papago:
+  secret: ${secret.papago.secret}
+  id: ${secret.papago.id}
+
+oxford:
+  app-id: ${secret.oxford.app-id}
+  app-key: ${secret.oxford.app-key}
