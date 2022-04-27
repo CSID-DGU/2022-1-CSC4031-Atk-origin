@@ -6,6 +6,8 @@ on:
 jobs: 
   build: 
     runs-on: ubuntu-18.04
+    env:
+      working-directory: ./server/stt-service
 
     steps: 
       - name: Checkout 
@@ -18,8 +20,10 @@ jobs:
 
       - name: Grant execute permission for gradlew 
         run: chmod +x server/stt-service/gradlew
+        working-directory: ${{ env.working-directory }}
         shell: bash 
 
       - name: Build with Gradle 
-        run: ./server/stt-service/gradlew build 
+        run: ./server/stt-service/gradlew build
+        working-directory: ${{ env.working-directory }}
         shell: bash # 다음 단계에서 스크립트 추가 예정
