@@ -290,33 +290,57 @@ const startCapture = function() {
 };
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request === "login") {
-    loginRequest("heesu", "1234");
+  if (request.type === "login") {
+    loginRequest(request.name, request.pw);
+  }
+  if (request.type === "signup") {
+    signUpRequest(request.name, request.pw);
   }
 });
 
-const loginRequest = function(username, pwd) {
+const loginRequest = function(name, pwd) {
   //e.preventDefault();
-  console.log("start");
-  //var data = $.toJSON({'username': username, 'password': pwd});
+  if(name==="" || pwd ===""){
+    chrome.runtime.sendMessage("stringEmpty");
+    return;
+  }
 
+  console.log("API LOGIN REQUEST");
   const req = new XMLHttpRequest();
-  //const baseUrl = "https://cors-anywhere.herokuapp.com/http://localhost/api/user/login";
   const baseUrl = "http://localhost/api/user/login";
-
-  //const urlParams = `username=${username}&password=${pwd}`;
-  ///const urlParams =JSON.stringify({"username": username,"pwd": pwd});
+  var data = JSON.stringify({username: name, password: pwd});
   req.open("POST", baseUrl, true);
-  req.setRequestHeader("Content-type", "application/json");
-  //;charset=utf-8
-  req.send(JSON.stringify({username: "heesu", password: "1234"}));
-
-  req.onreadystatechange = function() { // Call a function when the state changes.
+  req.setRequestHeader("Content-type", "application/json;charset=utf-8");
+  req.send(data);
+  req.onreadystatechange = function() { 
       if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-          console.log("Got response 200!");
+        console.log("API LOGIN RESPONSE: " + this.getResponseHeader("Authorization"));
+        chrome.runtime.sendMessage("loginSuccess");
+      } else if(this.readyState === XMLHttpRequest.DONE && this.status != 200){
+        console.log("API LOGIN RESPONSE: login failed!");
+        chrome.runtime.sendMessage("loginFail");
       }
-      else{
-        console.log("failed " + req.responseText + req.request);
+  }
+}
+
+const signUpRequest = function(name, pwd) {
+  //e.preventDefault();
+  if(name==="" || pwd ===""){
+    chrome.runtime.sendMessage("stringEmpty");
+    return;
+  }
+
+  console.log("start");
+  const req = new XMLHttpRequest();
+  const baseUrl = "http://localhost/api/user/join";
+  var data = JSON.stringify({username: name, password: pwd});
+  req.open("POST", baseUrl, true);
+  req.setRequestHeader("Content-type", "application/json;charset=utf-8");
+  req.send(data);
+  req.onreadystatechange = function() { 
+      if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+        console.log("API LOGIN RESPONSE: " + this.responseText);
+        chrome.runtime.sendMessage("signUpSuccess");
       }
   }
 }
