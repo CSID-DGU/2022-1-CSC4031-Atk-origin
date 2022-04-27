@@ -29,6 +29,6 @@ jobs:
         working-directory: ${{ env.working-directory }}
         shell: bash # 다음 단계에서 스크립트 추가 예정
         env:
-          rds.url: ${{ secrets.RDS_URL }}
-          rds.username: ${{ secrets.RDS_USERNAME }}
-          rds.password: ${{ secrets.RDS_PASSWORD }}
+          spring.datasource.url: ${{ secrets.RDS_URL }}
+          spring.datasource.username: ${{ secrets.RDS_USERNAME }}
+          spring.datasource.password: ${{ secrets.RDS_PASSWORD }}
