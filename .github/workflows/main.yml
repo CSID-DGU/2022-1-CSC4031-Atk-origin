@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-18.04
     env:
       working-directory: ./server/stt-service
+      resource_path: ./server/stt-service/src/main/resources/application.yaml
 
     steps: 
       - name: Checkout 
@@ -24,6 +25,10 @@ jobs:
         shell: bash 
 
       - name: Build with Gradle 
-        run: ./gradlew build -x test
+        run: ./gradlew build
         working-directory: ${{ env.working-directory }}
         shell: bash # 다음 단계에서 스크립트 추가 예정
+        env:
+          rds.url: ${{ secrets.RDS_URL }}
+          rds.username: ${{ secrets.RDS_USERNAME }}
+          rds.password: ${{ secrets.RDS_PASSWORD }}
