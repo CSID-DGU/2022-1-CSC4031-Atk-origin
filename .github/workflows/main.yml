@@ -19,11 +19,11 @@ jobs:
           java-version: 11 
 
       - name: Grant execute permission for gradlew 
-        run: chmod +x server/stt-service/gradlew
+        run: chmod +x gradlew
         working-directory: ${{ env.working-directory }}
         shell: bash 
 
       - name: Build with Gradle 
-        run: ./server/stt-service/gradlew build
+        run: ./gradlew build
         working-directory: ${{ env.working-directory }}
         shell: bash # 다음 단계에서 스크립트 추가 예정
