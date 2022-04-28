@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
   signupButton.style.display="none";
   loginFailMsg.style.display="none";
   emptyMsg.style.display="none";
-  
+  getCookie();
   loginButton.onclick = () => {chrome.runtime.sendMessage({type:"login", name:nameInput.value, pw:pwInput.value})};
   signupButton.onclick = () => {chrome.runtime.sendMessage({type:"signup", name:nameInput.value, pw:pwInput.value})};
 
@@ -47,8 +47,29 @@ document.addEventListener('DOMContentLoaded', function() {
     signup.style.display="block";
   }
 
+  function setCookie(name, pwd){
+    chrome.extension.sendMessage({name: 'setLoginCookie', username:name, password:pwd}, function(otherResponse) {
+        console.log(otherResponse)
+    })
+  }
+
+  function getCookie(){
+    chrome.extension.sendMessage({name: 'getLoginCookie'}, function(response) {
+      if(response.username){
+        window.location.href="popup.html";
+        if(loginFailMsg.style.display==="block"){
+          loginFailMsg.style.display="none";
+        }
+        if(emptyMsg.style.display==="block"){
+          emptyMsg.style.display="none";
+        }
+      }
+    })
+  }
+
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request === "loginSuccess") {
+      setCookie(nameInput.value, pwInput.value);
       window.location.href="popup.html";
       if(loginFailMsg.style.display==="block"){
         loginFailMsg.style.display="none";

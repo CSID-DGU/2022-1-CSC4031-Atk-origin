@@ -291,6 +291,28 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === "signup") {
     signUpRequest(request.name, request.pw);
   }
+  if (request.type === "logOut") {
+    var toRemove = ["username","password"];
+    chrome.storage.sync.remove(toRemove);
+  }
+});
+
+chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
+
+  if (request.name == 'setLoginCookie') {
+      var obj = {username:request.username, password:request.password}    
+      chrome.storage.sync.set(obj, function() {
+          alert('로그인 성공');
+      });           
+  }    
+
+  if (request.name == 'getLoginCookie') {
+         chrome.storage.sync.get(function(data) {
+              sendResponse({ username: data.username, password: data.password });
+      })       
+  }
+  return true;
+
 });
 
 const loginRequest = function(name, pwd) {
@@ -311,6 +333,10 @@ const loginRequest = function(name, pwd) {
       if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
         console.log("API LOGIN RESPONSE: " + this.getResponseHeader("Authorization"));
         chrome.runtime.sendMessage("loginSuccess");
+        var obj = {test:"test"}    
+        chrome.storage.sync.set(obj, function() {
+          console.log('Data saved');
+        });      
         checkUrl();
       } else if(this.readyState === XMLHttpRequest.DONE && this.status != 200){
         console.log("API LOGIN RESPONSE: login failed!");
@@ -355,3 +381,4 @@ const checkUrl = function() {
     }
   });
 };
+
