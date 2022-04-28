@@ -3,6 +3,7 @@ package site.atkproject.sttservice.domain.lecture;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import site.atkproject.sttservice.domain.quiz.Quiz;
 import site.atkproject.sttservice.domain.user.User;
@@ -25,6 +26,11 @@ public class Lecture {
     @Lob
     private String content;
 
+    @Lob
+    private String translation;
+
+    private Boolean hasKeyword;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -33,6 +39,7 @@ public class Lecture {
     private List<Quiz> quizzes = new ArrayList<>();
 
     @CreatedDate
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
     @Builder
@@ -46,5 +53,13 @@ public class Lecture {
         }
         this.user = user;
         user.getLectures().add(this);
+    }
+
+    public void updateHasKey(Boolean bool) {
+        this.hasKeyword = bool;
+    }
+
+    public void updateTranslation(String text) {
+        this.translation = text;
     }
 }

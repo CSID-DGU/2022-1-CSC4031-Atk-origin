@@ -6,10 +6,24 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MariaDB103Dialect
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
 
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     url: ${local.url}
     username: ${local.username}
     password: ${local.password}
+
+jwt:
+  hash-key: ${secret.jwt.hash-key}
+  expire-time: ${secret.jwt.expire-time}
+  subject: ${secret.jwt.subject}
+
+# 파파고 API 키
+papago:
+  secret: ${secret.papago.secret}
+  id: ${secret.papago.id}
+
+oxford:
+  app-id: ${secret.oxford.app-id}
+  app-key: ${secret.oxford.app-key}

@@ -1,4 +1,4 @@
-package site.atkproject.sttservice.web.dto;
+package site.atkproject.sttservice.web.dto.request;
 
 import lombok.Data;
 

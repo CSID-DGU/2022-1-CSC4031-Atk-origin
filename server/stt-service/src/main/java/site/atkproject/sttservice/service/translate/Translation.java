@@ -4,5 +4,5 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 public interface Translation {
 
-    public String translate(String sourceText) throws JsonProcessingException;
+    public String translate(String sourceText);
 }
