@@ -7,6 +7,7 @@ const displayStatus = function() { //function to handle the display of time and 
     const timeRem = document.getElementById("timeRem");
     const startButton = document.getElementById('start');
     const finishButton = document.getElementById('finish');
+    const logOutButton = document.getElementById('logout');
     const cancelButton = document.getElementById('cancel');
     chrome.runtime.sendMessage({currentTab: tabs[0].id}, (response) => {
       if(response) {
@@ -38,12 +39,22 @@ const displayStatus = function() { //function to handle the display of time and 
         });
         finishButton.style.display = "block";
         cancelButton.style.display = "block";
+        logOutButton.style.display = "block";
       } else {
         startButton.style.display = "block";
+        logOutButton.style.display = "block";
       }
     });
   });
 }
+
+const logOut = function() {  
+  chrome.extension.sendMessage({name: 'getLoginCookie'}, function(response) {
+    chrome.runtime.sendMessage({type:"logOut", username:response.username, password:response.password});
+    window.location.href="login.html";
+  })
+}
+
 
 const parseTime = function(time) { //function to display time remaining or time elapsed
   let minutes = Math.floor((time/1000)/60);
@@ -115,9 +126,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const startButton = document.getElementById('start');
   const finishButton = document.getElementById('finish');
   const cancelButton = document.getElementById('cancel');
+  const logOutButton= document.getElementById('logout');
   startButton.onclick = () => {chrome.runtime.sendMessage("startCapture")};
   finishButton.onclick = () => {chrome.runtime.sendMessage("stopCapture")};
   cancelButton.onclick = () => {chrome.runtime.sendMessage("cancelCapture")};
+  logOutButton.onclick = () => {logOut()};
   const version = document.getElementById("version");
   version.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
 
