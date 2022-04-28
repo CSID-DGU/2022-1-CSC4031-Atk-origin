@@ -264,28 +264,23 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 const startCapture = function() {
   chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-    // CODE TO BLOCK CAPTURE ON YOUTUBE, DO NOT REMOVE
-    // if(tabs[0].url.toLowerCase().includes("youtube")) {
-    //   chrome.tabs.create({url: "error.html"});
-    // } else {
-      if(!sessionStorage.getItem(tabs[0].id)) {
-        sessionStorage.setItem(tabs[0].id, Date.now());
-        chrome.storage.sync.get({
-          maxTime: 10000,
-          muteTab: false,
-          format: "wav",
-          quality: 96,
-          limitRemoved: false
-        }, (options) => {
-          let time = options.maxTime;
-          if(time > 10000) {
-            time = 10000
-          }
-          audioCapture(time, options.muteTab, options.format, options.quality, options.limitRemoved);
-        });
-        chrome.runtime.sendMessage({captureStarted: tabs[0].id, startTime: Date.now()});
-      }
-    // }
+    if(!sessionStorage.getItem(tabs[0].id)) {
+      sessionStorage.setItem(tabs[0].id, Date.now());
+      chrome.storage.sync.get({
+        maxTime: 10000,
+        muteTab: false,
+        format: "wav",
+        quality: 96,
+        limitRemoved: false
+      }, (options) => {
+        let time = options.maxTime;
+        if(time > 10000) {
+          time = 10000
+        }
+        audioCapture(time, options.muteTab, options.format, options.quality, options.limitRemoved);
+      });
+      chrome.runtime.sendMessage({captureStarted: tabs[0].id, startTime: Date.now()});
+    }
   });
 };
 
@@ -316,6 +311,7 @@ const loginRequest = function(name, pwd) {
       if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
         console.log("API LOGIN RESPONSE: " + this.getResponseHeader("Authorization"));
         chrome.runtime.sendMessage("loginSuccess");
+        checkUrl();
       } else if(this.readyState === XMLHttpRequest.DONE && this.status != 200){
         console.log("API LOGIN RESPONSE: login failed!");
         chrome.runtime.sendMessage("loginFail");
@@ -350,3 +346,12 @@ chrome.commands.onCommand.addListener((command) => {
     startCapture();
   }
 });
+
+const checkUrl = function() {
+  chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
+    let url = tabs[0].url;
+    if(url.toLowerCase().includes("ted")===false) {
+      chrome.tabs.create({url: "https://ted.com"});
+    }
+  });
+};
