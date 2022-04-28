@@ -23,7 +23,7 @@ public class TranslationImpl implements Translation {
     private String papagoSecret;
 
     @Override
-    public String translate(String sourceText) throws JsonProcessingException {
+    public String translate(String sourceText) {
         ObjectMapper objectMapper = new ObjectMapper();
         String clientId = papagoId;//애플리케이션 클라이언트 아이디값";
         String clientSecret = papagoSecret;//애플리케이션 클라이언트 시크릿값";
@@ -36,8 +36,12 @@ public class TranslationImpl implements Translation {
         requestHeaders.put("X-Naver-Client-Secret", clientSecret);
 
         String responseBody = post(apiURL, requestHeaders, text);
-
-        JsonNode jsonNode = objectMapper.readTree(responseBody);
+        JsonNode jsonNode;
+        try {
+             jsonNode = objectMapper.readTree(responseBody);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("해석 오류");
+        }
         return jsonNode.get("message").get("result").get("translatedText").textValue();
     }
 

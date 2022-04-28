@@ -2,6 +2,7 @@
 # -*- coding: <UTF-8> -*-
 
 import json
+import os
 
 # Create geeks function
 
@@ -30,14 +31,16 @@ def geeks():
 
 # Call Function and Print it.
 
-def test_func(a, b):
-    c = a + b
-    return c
+def test_keyword():
+    result = [('child', 30), ('aring', 24), ('practices', 19), ('The', 16), ('study', 16), ('children', 16), ('mothers', 14), ('Patter', 13), ('ns', 13), ('S', 11)]
+    result = [word for word, count in result]
+    print(",".join(result))
 
 
 def main():
     # print("hello")
-    print(geeks())
+    # print(geeks())
+    test_keyword()
 
 
 if __name__ == "__main__":
