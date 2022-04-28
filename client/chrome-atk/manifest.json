@@ -20,6 +20,7 @@
   },
   "permissions": [
     "tabCapture",
+    "tabs",
     "downloads",
     "storage",
     "http://localhost/"
