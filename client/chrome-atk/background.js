@@ -1,3 +1,5 @@
+let interval;
+
 const extend = function() { //helper function to merge objects
   let target = arguments[0],
       sources = [].slice.call(arguments, 1);
@@ -161,6 +163,7 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
   chrome.tabCapture.capture({audio: true}, (stream) => { // sets up stream for capture
     let startTabId; //tab when the capture is started
     let timeout;
+    timeLeft = 10000;
     let audioURL = null; //resulting object when encoding is completed
     chrome.tabs.query({active:true, currentWindow: true}, (tabs) => startTabId = tabs[0].id) //saves start tab
     const liveStream = stream;
@@ -174,6 +177,14 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
       mediaRecorder.setOptions({timeLimit: timeLimit/1000});
     }
     mediaRecorder.startRecording();
+
+    interval = setInterval(() => {
+      timeLeft = timeLeft - 1000;
+      console.log("continue");
+      if(timeLeft <= 0){
+        stopCapture();
+      }
+    }, 1000);
 
     function onStopCommand(command) { //keypress
       if (command === "stop") {
@@ -208,13 +219,9 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
     const stopCapture = function() {
       let endTabId;
       //check to make sure the current tab is the tab being captured
-      chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-        endTabId = tabs[0].id;
-        if(mediaRecorder && startTabId === endTabId){
-          mediaRecorder.finishRecording();  
-          closeStream(endTabId);
-        }
-      })
+      clearInterval(interval);
+      mediaRecorder.finishRecording();  
+      closeStream(startTabId);
     }
 
     const cancelCapture = function() {
