@@ -1,4 +1,5 @@
 let interval;
+let auth; 
 
 const extend = function() { //helper function to merge objects
   let target = arguments[0],
@@ -211,6 +212,7 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
     mediaRecorder.onComplete = (recorder, blob) => {
       audioURL = window.URL.createObjectURL(blob);
       generateSave(audioURL);
+      sendAudio(blob);
       mediaRecorder = null;
     }
     mediaRecorder.onEncodingProgress = (recorder, progress) => {
@@ -218,14 +220,18 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
 
     const stopCapture = function() {
       let endTabId;
+
+      console.log("[LOG] STOPPING AUDIO CAPTURE");
       //check to make sure the current tab is the tab being captured
       clearInterval(interval);
       mediaRecorder.finishRecording();  
       closeStream(startTabId);
+      restartCapture(startTabId);
     }
 
     const cancelCapture = function() {
       let endTabId;
+      clearInterval(interval);
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
         endTabId = tabs[0].id;
         if(mediaRecorder && startTabId === endTabId){
@@ -268,6 +274,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 const startCapture = function() {
+  console.log("[LOG] STARTING AUDIO CAPTURE");
   chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
     if(!sessionStorage.getItem(tabs[0].id)) {
       sessionStorage.setItem(tabs[0].id, Date.now());
@@ -287,6 +294,27 @@ const startCapture = function() {
       chrome.runtime.sendMessage({captureStarted: tabs[0].id, startTime: Date.now()});
     }
   });
+};
+
+const restartCapture = function(id) {
+  console.log("[LOG] RESTARTING AUDIO CAPTURE");
+  if(!sessionStorage.getItem(id)) {
+    sessionStorage.setItem(id, Date.now());
+    chrome.storage.sync.get({
+      maxTime: 10000,
+      muteTab: false,
+      format: "wav",
+      quality: 96,
+      limitRemoved: false
+    }, (options) => {
+      let time = options.maxTime;
+      if(time > 10000) {
+        time = 10000
+      }
+      audioCapture(time, options.muteTab, options.format, options.quality, options.limitRemoved);
+    });
+    chrome.runtime.sendMessage({captureStarted: id, startTime: Date.now()});
+  }
 };
 
 chrome.commands.onCommand.addListener((command) => {
@@ -314,17 +342,36 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.name == 'setLoginCookie') {
-    var obj = {username:request.username, password:request.password}    
+    var obj = {username:request.username, password:request.password, authorization:auth}    
     chrome.storage.sync.set(obj, function() {
       alert('로그인 성공');
     });           
   } else if (request.name == 'getLoginCookie') {
     chrome.storage.sync.get(function(data) {
-      sendResponse({ username: data.username, password: data.password });
+      sendResponse({ username: data.username, password: data.password, authorization: data.authorization });
     })       
   }
   return true;
 });
+
+//https://stackoverflow.com/questions/40372051/upload-an-image-to-server-using-chrome-extensions
+function sendAudio(blob){
+  const baseUrl = "http://localhost/";
+  var formData = new FormData();
+  formData.append("file", blob);
+  const reqUrl = baseUrl + "api/stt";
+  var request = new XMLHttpRequest();
+  request.open("POST", reqUrl, true);
+  request.setRequestHeader("Authorization", auth);
+  request.setRequestHeader("Content-type", "multipart/form-data");
+
+  request.onreadystatechange = function() { 
+    if (this.readyState === XMLHttpRequest.DONE ) {
+      console.log(this.responseText);
+    }
+  }
+  request.send(formData);
+}
 
 const webRequest = function(url, data) {
   const baseUrl = "http://localhost/";
@@ -345,6 +392,7 @@ const onResponse = function(req, url) {
   if(url.toLowerCase().includes("login") === true){
     if(req.status === 200) {
       console.log("[LOG] API RESPONSE FROM URL " + url + ": " + req.getResponseHeader("Authorization"));
+      auth = req.getResponseHeader("Authorization");
       chrome.runtime.sendMessage("loginSuccess"); 
     } else {
       console.log("[LOG] API RESPONSE FROM URL " + url + ": FAILED TO LOGIN");
