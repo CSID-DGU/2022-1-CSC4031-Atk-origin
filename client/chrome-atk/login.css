@@ -88,7 +88,7 @@ input{
   position: relative;
 }
 
-#signup {
+#signUpLink {
   margin-left:10px;
   float: left;
   font-family: sans-serif;
@@ -97,7 +97,6 @@ input{
   text-decoration: underline;
   font-weight: bold;
   cursor: pointer;
-
 }
 
 #version {
@@ -130,6 +129,14 @@ input{
   border-radius: 5px;
   width: -webkit-fill-available;
   margin-top: 50px;
+}
+
+#signupButton {
+  margin-right: 7.5px;
+}
+
+#cancelButton {
+  margin-left: 7.5px;
 }
 
 .button:hover {

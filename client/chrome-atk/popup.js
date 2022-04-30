@@ -4,12 +4,16 @@ let timeLeft;
 const displayStatus = function() { //function to handle the display of time and buttons
   chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
     const status = document.getElementById("status");
+    const userName = document.getElementById('userName');
     const timeRem = document.getElementById("timeRem");
     const startButton = document.getElementById('start');
     const finishButton = document.getElementById('finish');
     const logOutButton = document.getElementById('logout');
     const cancelButton = document.getElementById('cancel');
     chrome.runtime.sendMessage({type:"checkUrl"});
+    chrome.extension.sendMessage({name: 'getLoginCookie'}, function(response) {
+      userName.textContent="Hello " + response.username + "!";
+    })
     chrome.runtime.sendMessage({currentTab: tabs[0].id}, (response) => {
       if(response) {
         chrome.storage.sync.get({
@@ -50,12 +54,9 @@ const displayStatus = function() { //function to handle the display of time and 
 }
 
 const logOut = function() {  
-  chrome.extension.sendMessage({name: 'getLoginCookie'}, function(response) {
-    chrome.runtime.sendMessage({type:"logOut", username:response.username, password:response.password});
-    window.location.href="login.html";
-  })
+  chrome.runtime.sendMessage({type:"logOut"});
+  window.location.href="login.html";
 }
-
 
 const parseTime = function(time) { //function to display time remaining or time elapsed
   let minutes = Math.floor((time/1000)/60);
