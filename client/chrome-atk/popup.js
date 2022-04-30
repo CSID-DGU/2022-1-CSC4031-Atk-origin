@@ -9,6 +9,7 @@ const displayStatus = function() { //function to handle the display of time and 
     const finishButton = document.getElementById('finish');
     const logOutButton = document.getElementById('logout');
     const cancelButton = document.getElementById('cancel');
+    chrome.runtime.sendMessage({type:"checkUrl"});
     chrome.runtime.sendMessage({currentTab: tabs[0].id}, (response) => {
       if(response) {
         chrome.storage.sync.get({
