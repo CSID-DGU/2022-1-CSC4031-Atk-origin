@@ -329,22 +329,27 @@ const webRequest = function(url, data) {
   req.send(data);
   req.onreadystatechange = function() { 
     if (this.readyState === XMLHttpRequest.DONE ) {
-      if(this.status === 200) {
-        onResponse(this, url);
-      } else{
-        console.log("[LOG] API RESPONSE FROM URL " + url + ": REQUEST FAILED");
-      }
+      onResponse(this, url);
     }
   }
 }
 
 const onResponse = function(req, url) {
   if(url.toLowerCase().includes("login") === true){
-    console.log("[LOG] API RESPONSE FROM URL " + url + ": " + req.getResponseHeader("Authorization"));
-    chrome.runtime.sendMessage("loginSuccess");      
+    if(req.status === 200) {
+      console.log("[LOG] API RESPONSE FROM URL " + url + ": " + req.getResponseHeader("Authorization"));
+      chrome.runtime.sendMessage("loginSuccess"); 
+    } else {
+      console.log("[LOG] API RESPONSE FROM URL " + url + ": FAILED TO LOGIN");
+      chrome.runtime.sendMessage("loginFail"); 
+    }
   } else if(url.toLowerCase().includes("join") === true){
-    console.log("[LOG] API RESPONSE FROM URL " + url + ": " + req.responseText);
-    chrome.runtime.sendMessage("signUpSuccess");
+    if(req.status === 200) {
+      console.log("[LOG] API RESPONSE FROM URL " + url + ": " + req.responseText);
+      chrome.runtime.sendMessage("signUpSuccess");
+    } else {
+      console.log("[LOG] API RESPONSE FROM URL " + url + ": FAILED TO JOIN");
+    }
   }
 }
 
