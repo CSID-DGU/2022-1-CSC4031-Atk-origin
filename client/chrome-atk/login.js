@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
   emptyMsg.style.display="none";
   getCookie();
   loginButton.onclick = () => {chrome.runtime.sendMessage({type:"login", name:nameInput.value, pw:pwInput.value})};
-  signupButton.onclick = () => {chrome.runtime.sendMessage({type:"signup", name:nameInput.value, pw:pwInput.value})};
+  signupButton.onclick = () => {chrome.runtime.sendMessage({type:"join", name:nameInput.value, pw:pwInput.value})};
 
   version.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
   signup.onclick = () => {showSignUp()};

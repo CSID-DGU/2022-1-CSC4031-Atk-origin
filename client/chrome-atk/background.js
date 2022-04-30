@@ -249,8 +249,6 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
   });
 }
 
-
-
 //sends reponses to and from the popup menu
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.currentTab && sessionStorage.getItem(request.currentTab)) {
@@ -284,101 +282,85 @@ const startCapture = function() {
   });
 };
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.type === "login") {
-    loginRequest(request.name, request.pw);
-  }
-  if (request.type === "signup") {
-    signUpRequest(request.name, request.pw);
-  }
-  if (request.type === "logOut") {
-    var toRemove = ["username","password"];
-    chrome.storage.sync.remove(toRemove);
-  }
-});
-
-chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
-
-  if (request.name == 'setLoginCookie') {
-      var obj = {username:request.username, password:request.password}    
-      chrome.storage.sync.set(obj, function() {
-          alert('로그인 성공');
-      });           
-  }    
-
-  if (request.name == 'getLoginCookie') {
-         chrome.storage.sync.get(function(data) {
-              sendResponse({ username: data.username, password: data.password });
-      })       
-  }
-  return true;
-
-});
-
-const loginRequest = function(name, pwd) {
-  //e.preventDefault();
-  if(name==="" || pwd ===""){
-    chrome.runtime.sendMessage("stringEmpty");
-    return;
-  }
-
-  console.log("API LOGIN REQUEST");
-  const req = new XMLHttpRequest();
-  const baseUrl = "http://localhost/api/user/login";
-  var data = JSON.stringify({username: name, password: pwd});
-  req.open("POST", baseUrl, true);
-  req.setRequestHeader("Content-type", "application/json;charset=utf-8");
-  req.send(data);
-  req.onreadystatechange = function() { 
-      if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-        console.log("API LOGIN RESPONSE: " + this.getResponseHeader("Authorization"));
-        chrome.runtime.sendMessage("loginSuccess");
-        var obj = {test:"test"}    
-        chrome.storage.sync.set(obj, function() {
-          console.log('Data saved');
-        });      
-        checkUrl();
-      } else if(this.readyState === XMLHttpRequest.DONE && this.status != 200){
-        console.log("API LOGIN RESPONSE: login failed!");
-        chrome.runtime.sendMessage("loginFail");
-      }
-  }
-}
-
-const signUpRequest = function(name, pwd) {
-  //e.preventDefault();
-  if(name==="" || pwd ===""){
-    chrome.runtime.sendMessage("stringEmpty");
-    return;
-  }
-
-  console.log("start");
-  const req = new XMLHttpRequest();
-  const baseUrl = "http://localhost/api/user/join";
-  var data = JSON.stringify({username: name, password: pwd});
-  req.open("POST", baseUrl, true);
-  req.setRequestHeader("Content-type", "application/json;charset=utf-8");
-  req.send(data);
-  req.onreadystatechange = function() { 
-      if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-        console.log("API LOGIN RESPONSE: " + this.responseText);
-        chrome.runtime.sendMessage("signUpSuccess");
-      }
-  }
-}
-
 chrome.commands.onCommand.addListener((command) => {
   if (command === "start") {
     startCapture();
   }
 });
 
+// Handles login/logout/join messages from login.js
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === "login" || request.type === "join") {
+    if(request.name === "" || request.pw === ""){
+      chrome.runtime.sendMessage("stringEmpty");
+      return;
+    }
+    const url = "api/user/" + request.type;
+    var data = JSON.stringify({username: request.name, password: request.pw});
+    webRequest(url, data);
+  } else if (request.type === "logOut") {
+    logOut();
+  } else if (request.type === "checkUrl") {
+    checkUrl();
+  }
+});
+
+chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
+  if (request.name == 'setLoginCookie') {
+    var obj = {username:request.username, password:request.password}    
+    chrome.storage.sync.set(obj, function() {
+      alert('로그인 성공');
+    });           
+  } else if (request.name == 'getLoginCookie') {
+    chrome.storage.sync.get(function(data) {
+      sendResponse({ username: data.username, password: data.password });
+    })       
+  }
+  return true;
+});
+
+const webRequest = function(url, data) {
+  const baseUrl = "http://localhost/";
+  console.log("[LOG] API REQUEST TO URL " + url);
+  const req = new XMLHttpRequest();
+  const reqUrl = baseUrl + url;
+  req.open("POST", reqUrl, true);
+  req.setRequestHeader("Content-type", "application/json;charset=utf-8");
+  req.send(data);
+  req.onreadystatechange = function() { 
+    if (this.readyState === XMLHttpRequest.DONE ) {
+      if(this.status === 200) {
+        onResponse(this, url);
+      } else{
+        console.log("[LOG] API RESPONSE FROM URL " + url + ": REQUEST FAILED");
+      }
+    }
+  }
+}
+
+const onResponse = function(req, url) {
+  if(url.toLowerCase().includes("login") === true){
+    console.log("[LOG] API RESPONSE FROM URL " + url + ": " + req.getResponseHeader("Authorization"));
+    chrome.runtime.sendMessage("loginSuccess");      
+  } else if(url.toLowerCase().includes("join") === true){
+    console.log("[LOG] API RESPONSE FROM URL " + url + ": " + req.responseText);
+    chrome.runtime.sendMessage("signUpSuccess");
+  }
+}
+
+const logOut = function() {
+  console.log("[LOG] LOGOUT");
+  var toRemove = ["username","password"];
+  chrome.storage.sync.remove(toRemove);
+}
+
+// Open new tab if url doesn't contain ted.com
 const checkUrl = function() {
+  console.log("[LOG] Check URL");
   chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
     let url = tabs[0].url;
-    if(url.toLowerCase().includes("ted")===false) {
+    if(url.toLowerCase().includes("ted.com") === false) {
       chrome.tabs.create({url: "https://ted.com"});
     }
   });
 };
-
