@@ -6,22 +6,33 @@
   </head>
   <body>
     <div class="header">
-      <img src="./icon.png"/> 
-      <h1>Kong Teacher</h1>
+      <img id="icon" src="./icon.png"/> 
+      <div class="logoTitle">
+        <h1>Kong Teacher</h1>
+        <img id="logo" src="./bean.png"/>
+      </div>      
     </div>
-    <ul id="title">Log in
+    <ul id="title">Login
       <li id="startKey">Please sign in to continue</li>
     </ul>
+    <ul id="signUpTitle">Sign up
+      <li id="signUpMsg">Create a new account</li>
+    </ul>
     <input type="text" placeholder="Enter user name" id="name" name="name" required
-      minlength="4" maxlength="8">
-    <input type="password" placeholder="Enter password" id="name" name="name" required
-      minlength="4" maxlength="8">
+      minlength="4" maxlength="16">
+    <input type="password" placeholder="Enter password" id="pw" name="pw" required
+      minlength="4" maxlength="16">
     <div class="buttonContainer">
       <div class="button" id="login">Login</div>
+      <div class="button" id="signupButton">Sign up</div>
+      <div class="button" id="cancelButton">Cancel</div>
     </div>
+    <p class="extra" id="msg">Don't have an account?</p>
     <div class="links">
-      <p id="signup">ver 0.0.1</p>
+      <p id="signUpLink">Sign up</p>
       <p id="version">ver 0.0.1</p>
     </div>
+    <p class="errorMsg" id="loginFailMsg">User name or password is incorrect.</p>
+    <p class="errorMsg" id="emptyMsg">User name or password is empty.</p>
   </body>
 </html>

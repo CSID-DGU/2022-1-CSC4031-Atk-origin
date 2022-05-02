@@ -26,15 +26,23 @@ body {
   white-space: nowrap;
 }
 
-.header img {
+#icon {
   float: left;
   padding-right: 15px;
   width: 64px;
   height: 64px;
 }
 
+#logo {
+  float: left;
+  margin-left: 10px;
+  width: 20px;
+  height: 23px;
+}
+
 .header h1 {
   position: relative;
+  float: left;
   margin: 0; 
 }
 

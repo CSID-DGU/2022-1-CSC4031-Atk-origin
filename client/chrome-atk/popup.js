@@ -4,50 +4,58 @@ let timeLeft;
 const displayStatus = function() { //function to handle the display of time and buttons
   chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
     const status = document.getElementById("status");
+    const userName = document.getElementById('userName');
     const timeRem = document.getElementById("timeRem");
     const startButton = document.getElementById('start');
     const finishButton = document.getElementById('finish');
+    const logOutButton = document.getElementById('logout');
     const cancelButton = document.getElementById('cancel');
-    //CODE TO BLOCK CAPTURE ON YOUTUBE, DO NOT DELETE
-    // if(tabs[0].url.toLowerCase().includes("youtube")) {
-    //   status.innerHTML = "Capture is disabled on this site due to copyright";
-    // } else {
-      chrome.runtime.sendMessage({currentTab: tabs[0].id}, (response) => {
-        if(response) {
-          chrome.storage.sync.get({
-            maxTime: 10000,
-            limitRemoved: false
-          }, (options) => {
-            if(options.maxTime > 10000) {
-              chrome.storage.sync.set({
-                maxTime: 10000
-              });
-              timeLeft = 10000 - (Date.now() - response)
-            } else {
-              timeLeft = options.maxTime - (Date.now() - response)
-            }
-            status.innerHTML = "Tab is currently being captured";
-            if(options.limitRemoved) {
+    chrome.runtime.sendMessage({type:"checkUrl"});
+    chrome.extension.sendMessage({name: 'getLoginCookie'}, function(response) {
+      userName.textContent="Hello " + response.username + "!";
+    })
+    chrome.runtime.sendMessage({currentTab: tabs[0].id}, (response) => {
+      if(response) {
+        chrome.storage.sync.get({
+          maxTime: 10000,
+          limitRemoved: false
+        }, (options) => {
+          if(options.maxTime > 10000) {
+            chrome.storage.sync.set({
+              maxTime: 10000
+            });
+            timeLeft = 10000 - (Date.now() - response)
+          } else {
+            timeLeft = options.maxTime - (Date.now() - response)
+          }
+          status.innerHTML = "Tab is currently being captured";
+          if(options.limitRemoved) {
+            timeRem.innerHTML = `${parseTime(Date.now() - response)}`;
+            interval = setInterval(() => {
               timeRem.innerHTML = `${parseTime(Date.now() - response)}`;
-              interval = setInterval(() => {
-                timeRem.innerHTML = `${parseTime(Date.now() - response)}`;
-              });
-            } else {
+            });
+          } else {
+            timeRem.innerHTML = `${parseTime(timeLeft)} remaining`;
+            interval = setInterval(() => {
+              timeLeft = timeLeft - 1000;
               timeRem.innerHTML = `${parseTime(timeLeft)} remaining`;
-              interval = setInterval(() => {
-                timeLeft = timeLeft - 1000;
-                timeRem.innerHTML = `${parseTime(timeLeft)} remaining`;
-              }, 1000);
-            }
-          });
-          finishButton.style.display = "block";
-          cancelButton.style.display = "block";
-        } else {
-          startButton.style.display = "block";
-        }
-      });
-    // }
+            }, 1000);
+          }
+        });
+        finishButton.style.display = "block";
+        cancelButton.style.display = "block";
+        logOutButton.style.display = "block";
+      } else {
+        startButton.style.display = "block";
+        logOutButton.style.display = "block";
+      }
+    });
   });
+}
+
+const logOut = function() {  
+  chrome.runtime.sendMessage({type:"logOut"});
+  window.location.href="login.html";
 }
 
 const parseTime = function(time) { //function to display time remaining or time elapsed
@@ -112,7 +120,6 @@ chrome.runtime.onMessage.addListener((request, sender) => {
   });
 });
 
-
 //initial display for popup menu when opened
 document.addEventListener('DOMContentLoaded', function() {
   displayStatus();
@@ -121,9 +128,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const startButton = document.getElementById('start');
   const finishButton = document.getElementById('finish');
   const cancelButton = document.getElementById('cancel');
+  const logOutButton= document.getElementById('logout');
   startButton.onclick = () => {chrome.runtime.sendMessage("startCapture")};
   finishButton.onclick = () => {chrome.runtime.sendMessage("stopCapture")};
   cancelButton.onclick = () => {chrome.runtime.sendMessage("cancelCapture")};
+  logOutButton.onclick = () => {logOut()};
   const version = document.getElementById("version");
   version.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
 

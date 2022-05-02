@@ -1,0 +1,74 @@
+name: atk-action
+
+on: 
+  workflow_dispatch:
+
+jobs: 
+  build: 
+    runs-on: ubuntu-18.04
+    env:
+      working-directory: ./server/stt-service
+      resource_path: ./server/stt-service/src/main/resources/application-prod.yml
+
+    steps: 
+      - name: Checkout 
+        uses: actions/checkout@v2 
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1 
+        with: 
+          java-version: 11
+
+      - name: Set yaml file
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: ${{ env.resource_path }}
+        env:
+          spring.datasource.url: ${{ secrets.RDS_URL }}
+          spring.datasource.username: ${{ secrets.RDS_USERNAME }}
+          spring.datasource.password: ${{ secrets.RDS_PASSWORD }}
+          jwt.hash-key: ${{ secrets.JWT_HASH_KEY }}
+          jwt.expire-time: ${{ secrets.JWT_EXPIRE_TIME }}
+          jwt.subject: ${{ secrets.JWT_SUBJECT }}
+          papago.secret: ${{ secrets.PAPAGO_SECRET }}
+          papago.id: ${{ secrets.PAPAGO_ID }}
+          oxford.app-id: ${{ secrets.OXFORD_ID }}
+          oxford.app-key: ${{ secrets.OXFORD_KEY }}
+
+      - name: Grant execute permission for gradlew 
+        run: chmod +x gradlew
+        working-directory: ${{ env.working-directory }}
+        shell: bash 
+
+      - name: Build with Gradle 
+        run: ./gradlew build
+        working-directory: ${{ env.working-directory }}
+        shell: bash
+        
+      # 디렉토리 생성
+      - name: Make Directory
+        run: mkdir -p deploy
+        working-directory: ${{ env.working-directory }}
+
+      # Jar 파일 복사
+      - name: Copy Jar
+        run: cp ./build/libs/*.jar ./deploy
+        working-directory: ${{ env.working-directory }}
+
+      # 파일 압축
+      - name: Make zip file
+        run: zip -r ./springboor-with-githubaction.zip ./deploy
+        working-directory: ${{ env.working-directory }}
+
+      # Deploy
+      - name: Deploy
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Upload to S3
+        run: aws s3 cp --region ap-northeast-2 ./springboor-with-githubaction.zip s3://atkproject-bucket/springboot-with-githubaction.zip
+        working-directory: ${{ env.working-directory }}
+

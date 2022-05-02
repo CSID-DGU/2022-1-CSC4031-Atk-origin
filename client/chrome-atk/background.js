@@ -249,8 +249,6 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
   });
 }
 
-
-
 //sends reponses to and from the popup menu
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.currentTab && sessionStorage.getItem(request.currentTab)) {
@@ -264,65 +262,110 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 const startCapture = function() {
   chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-    // CODE TO BLOCK CAPTURE ON YOUTUBE, DO NOT REMOVE
-    // if(tabs[0].url.toLowerCase().includes("youtube")) {
-    //   chrome.tabs.create({url: "error.html"});
-    // } else {
-      if(!sessionStorage.getItem(tabs[0].id)) {
-        sessionStorage.setItem(tabs[0].id, Date.now());
-        chrome.storage.sync.get({
-          maxTime: 10000,
-          muteTab: false,
-          format: "wav",
-          quality: 96,
-          limitRemoved: false
-        }, (options) => {
-          let time = options.maxTime;
-          if(time > 10000) {
-            time = 10000
-          }
-          audioCapture(time, options.muteTab, options.format, options.quality, options.limitRemoved);
-        });
-        chrome.runtime.sendMessage({captureStarted: tabs[0].id, startTime: Date.now()});
-      }
-    // }
+    if(!sessionStorage.getItem(tabs[0].id)) {
+      sessionStorage.setItem(tabs[0].id, Date.now());
+      chrome.storage.sync.get({
+        maxTime: 10000,
+        muteTab: false,
+        format: "wav",
+        quality: 96,
+        limitRemoved: false
+      }, (options) => {
+        let time = options.maxTime;
+        if(time > 10000) {
+          time = 10000
+        }
+        audioCapture(time, options.muteTab, options.format, options.quality, options.limitRemoved);
+      });
+      chrome.runtime.sendMessage({captureStarted: tabs[0].id, startTime: Date.now()});
+    }
   });
 };
-
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request === "login") {
-    loginRequest("heesu", "1234");
-  }
-});
-
-const loginRequest = function(username, pwd) {
-  //e.preventDefault();
-  console.log("start");
-  //var data = $.toJSON({'username': username, 'password': pwd});
-
-  const req = new XMLHttpRequest();
-  //const baseUrl = "https://cors-anywhere.herokuapp.com/http://localhost/api/user/login";
-  const baseUrl = "http://localhost/api/user/login";
-
-  //const urlParams = `username=${username}&password=${pwd}`;
-  ///const urlParams =JSON.stringify({"username": username,"pwd": pwd});
-  req.open("POST", baseUrl, true);
-  req.setRequestHeader("Content-type", "application/json");
-  //;charset=utf-8
-  req.send(JSON.stringify({username: "heesu", password: "1234"}));
-
-  req.onreadystatechange = function() { // Call a function when the state changes.
-      if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-          console.log("Got response 200!");
-      }
-      else{
-        console.log("failed " + req.responseText + req.request);
-      }
-  }
-}
 
 chrome.commands.onCommand.addListener((command) => {
   if (command === "start") {
     startCapture();
   }
 });
+
+// Handles login/logout/join messages from login.js
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === "login" || request.type === "join") {
+    if(request.name === "" || request.pw === ""){
+      chrome.runtime.sendMessage("stringEmpty");
+      return;
+    }
+    const url = "api/user/" + request.type;
+    var data = JSON.stringify({username: request.name, password: request.pw});
+    webRequest(url, data);
+  } else if (request.type === "logOut") {
+    logOut();
+  } else if (request.type === "checkUrl") {
+    checkUrl();
+  }
+});
+
+chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
+  if (request.name == 'setLoginCookie') {
+    var obj = {username:request.username, password:request.password}    
+    chrome.storage.sync.set(obj, function() {
+      alert('로그인 성공');
+    });           
+  } else if (request.name == 'getLoginCookie') {
+    chrome.storage.sync.get(function(data) {
+      sendResponse({ username: data.username, password: data.password });
+    })       
+  }
+  return true;
+});
+
+const webRequest = function(url, data) {
+  const baseUrl = "http://localhost/";
+  console.log("[LOG] API REQUEST TO URL " + url);
+  const req = new XMLHttpRequest();
+  const reqUrl = baseUrl + url;
+  req.open("POST", reqUrl, true);
+  req.setRequestHeader("Content-type", "application/json;charset=utf-8");
+  req.send(data);
+  req.onreadystatechange = function() { 
+    if (this.readyState === XMLHttpRequest.DONE ) {
+      onResponse(this, url);
+    }
+  }
+}
+
+const onResponse = function(req, url) {
+  if(url.toLowerCase().includes("login") === true){
+    if(req.status === 200) {
+      console.log("[LOG] API RESPONSE FROM URL " + url + ": " + req.getResponseHeader("Authorization"));
+      chrome.runtime.sendMessage("loginSuccess"); 
+    } else {
+      console.log("[LOG] API RESPONSE FROM URL " + url + ": FAILED TO LOGIN");
+      chrome.runtime.sendMessage("loginFail"); 
+    }
+  } else if(url.toLowerCase().includes("join") === true){
+    if(req.status === 200) {
+      console.log("[LOG] API RESPONSE FROM URL " + url + ": " + req.responseText);
+      chrome.runtime.sendMessage("signUpSuccess");
+    } else {
+      console.log("[LOG] API RESPONSE FROM URL " + url + ": FAILED TO JOIN");
+    }
+  }
+}
+
+const logOut = function() {
+  console.log("[LOG] LOGOUT");
+  var toRemove = ["username","password"];
+  chrome.storage.sync.remove(toRemove);
+}
+
+// Open new tab if url doesn't contain ted.com
+const checkUrl = function() {
+  console.log("[LOG] Check URL");
+  chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
+    let url = tabs[0].url;
+    if(url.toLowerCase().includes("ted.com") === false) {
+      chrome.tabs.create({url: "https://ted.com"});
+    }
+  });
+};
