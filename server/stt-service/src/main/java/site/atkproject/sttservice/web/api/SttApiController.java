@@ -2,12 +2,15 @@ package site.atkproject.sttservice.web.api;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import site.atkproject.sttservice.domain.lecture.Lecture;
 import site.atkproject.sttservice.service.SttService;
+import site.atkproject.sttservice.web.dto.request.SttStartRequestDto;
+import site.atkproject.sttservice.web.dto.response.SttStartResponseDto;
 
-import java.io.File;
 import java.io.IOException;
 
 @Slf4j
@@ -16,24 +19,19 @@ import java.io.IOException;
 @RequestMapping("/api/stt")
 public class SttApiController {
 
-    @Value("${file.dir}")
-    private String fileDir;
     private final SttService sttService;
 
     @GetMapping("")
-    public String all() {
-        return "all method";
+    public SttStartResponseDto startStt(@RequestBody SttStartRequestDto sttStartRequestDto) {
+        Lecture lecture = sttService.startStt(sttStartRequestDto);
+        return SttStartResponseDto.builder().id(lecture.getId()).title(lecture.getTitie()).build();
     }
 
-    @PostMapping("")
-    public String doStt(@RequestParam MultipartFile file) throws IOException {
-        log.info("{}", file);
+    @PostMapping("/{lectureId}")
+    public String doStt(@RequestParam MultipartFile file, @PathVariable Long lectureId) throws IOException {
 
         if (!file.isEmpty()) {
-            log.info("파일 저장");
-            String fullPath = fileDir + file.getOriginalFilename();
-            file.transferTo(new File(fullPath));
-            log.info("파일 저장 완료");
+            sttService.doSTT(file, lectureId);
         }
         return "dispath post";
     }

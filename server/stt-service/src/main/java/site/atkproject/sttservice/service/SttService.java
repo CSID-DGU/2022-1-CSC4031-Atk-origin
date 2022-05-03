@@ -1,67 +1,95 @@
 package site.atkproject.sttservice.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import site.atkproject.sttservice.domain.lecture.Lecture;
+import site.atkproject.sttservice.domain.lecture.LectureRepository;
+import site.atkproject.sttservice.domain.user.User;
+import site.atkproject.sttservice.domain.user.UserRepository;
+import site.atkproject.sttservice.util.PythonSTT;
+import site.atkproject.sttservice.web.dto.request.SttStartRequestDto;
 
 import java.io.*;
+import java.util.Optional;
 
+@Slf4j
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Service
 public class SttService {
 
-    public static void sendTextToSTTMachine() throws IOException, InterruptedException {
-        String command = "/opt/homebrew/bin/python3";  // 명령어
-        String arg1 = "~/test.py"; // 인자
-        ProcessBuilder builder = new ProcessBuilder(command, arg1);
-        Process process = builder.start();
-        int exitVal = process.waitFor();  // 자식 프로세스가 종료될 때까지 기다림
-        BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream(), "euc-kr")); // 서브 프로세스가 출력하는 내용을 받기 위해
-        String line;
-        while ((line = br.readLine()) != null) {
-            System.out.println(">>>  " + line); // 표준출력에 쓴다
+    private final LectureRepository lectureRepository;
+    private final UserRepository userRepository;
+    PythonSTT pythonSTT = new PythonSTT();
+
+    @Value("${file.dir}")
+    private String homeDir;
+
+    /**
+     *
+     * STT 시작, lecture 생성
+     */
+    @Transactional
+    public Lecture startStt(SttStartRequestDto sttStartRequestDto) {
+        String username = getUsername();
+        User user = userRepository.findByUsername(username);
+        Lecture lecture = sttStartRequestDto.toEntity();
+        lecture.setUser(user);
+        return lectureRepository.save(lecture);
+    }
+
+    @Transactional
+    public void doSTT(MultipartFile file, Long lectureId) throws IOException {
+
+        String fullPath = getFullPath(file);
+        Optional<Lecture> optional = lectureRepository.findById(lectureId);
+        Lecture lecture = null;
+        if (optional.isEmpty()) {
+            throw new RuntimeException("존재하지 않는 강의입니다.");
         }
-        if(exitVal != 0) {
-            // 비정상 종료
-            System.out.println("서브 프로세스가 비정상 종료되었다.");
+        lecture = optional.get();
+        saveFile(file, fullPath);
+        String fileName = getUsername() + "/" + file.getOriginalFilename();
+        String sttedContent = pythonSTT.getSTT(fileName);
+        lecture.updateContent(sttedContent);
+        boolean isDeleted = deleteFile(fullPath);
+    }
+
+    private void saveFile(MultipartFile file, String fullPath) throws IOException {
+        file.transferTo(new File(fullPath));
+    }
+
+    private boolean deleteFile(String fullPath) {
+        File file = new File(fullPath);
+        return file.delete();
+    }
+
+    private String getFullPath(MultipartFile file) {
+        String username = getUsername();
+
+        String finalPath = homeDir + "app/stt/" + username;
+        File folder = new File(finalPath);
+        if (!folder.exists()) {
+            try {
+                folder.mkdirs();
+            } catch (Exception e) {
+                e.getStackTrace();
+            }
         }
+
+        String fullPath = folder.getAbsolutePath() + "/" + file.getOriginalFilename();
+        return fullPath;
     }
 
-    public static void main(String[] args)
-            throws IOException,    InterruptedException {
-        String[] command = new String[] { "echo", "hello" };
-        SttService runner = new SttService();
-        runner.byRuntime(command);
-        runner.byProcessBuilder(command);
-//        runner.byProcessBuilderRedirect(command);
-    }
-
-    public void byRuntime(String[] command)
-            throws IOException, InterruptedException {
-        Runtime runtime = Runtime.getRuntime();
-        Process process = runtime.exec(command);
-        printStream(process);
-    }
-
-    public void byProcessBuilder(String[] command)
-            throws IOException,InterruptedException {
-        ProcessBuilder builder = new ProcessBuilder(command);
-        Process process = builder.start();
-        printStream(process);
-    }
-
-    private void printStream(Process process)
-            throws IOException, InterruptedException {
-        process.waitFor();
-        try (InputStream psout = process.getInputStream()) {
-            copy(psout, System.out);
-        }
-    }
-
-    public void copy(InputStream input, OutputStream output) throws IOException {
-        byte[] buffer = new byte[1024];
-        int n = 0;
-        while ((n = input.read(buffer)) != -1) {
-            output.write(buffer, 0, n);
-        }
+    private String getUsername() {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = userDetails.getUsername();
+        return username;
     }
 }

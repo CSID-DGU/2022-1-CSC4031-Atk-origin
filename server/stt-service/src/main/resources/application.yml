@@ -14,4 +14,4 @@ spring:
       ddl-auto: none
 
 file:
-  dir: /Users/seokjuhong/study/file/
+  dir: ${user.home}/

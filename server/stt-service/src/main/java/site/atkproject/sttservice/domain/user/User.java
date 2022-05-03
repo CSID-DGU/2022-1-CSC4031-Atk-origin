@@ -3,6 +3,7 @@ package site.atkproject.sttservice.domain.user;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import site.atkproject.sttservice.domain.BaseTimeEntity;
 import site.atkproject.sttservice.domain.lecture.Lecture;
 
 import javax.persistence.*;
@@ -13,7 +14,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Entity
-public class User {
+public class User extends BaseTimeEntity {
 
     @Id
     @GeneratedValue
