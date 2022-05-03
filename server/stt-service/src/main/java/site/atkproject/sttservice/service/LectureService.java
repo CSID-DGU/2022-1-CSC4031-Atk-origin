@@ -9,8 +9,12 @@ import site.atkproject.sttservice.domain.quiz.Quiz;
 import site.atkproject.sttservice.domain.quiz.QuizRepository;
 import site.atkproject.sttservice.service.keyword.Keyword;
 import site.atkproject.sttservice.service.translate.Translation;
+import site.atkproject.sttservice.web.dto.response.KeywordDto;
+import site.atkproject.sttservice.web.dto.response.KeywordResponseDto;
 import site.atkproject.sttservice.web.dto.response.TranslationResponseDto;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -40,20 +44,25 @@ public class LectureService {
     }
 
     @Transactional
-    public void makeKeyword(Long lectureId) {
+    public KeywordResponseDto makeKeyword(Long lectureId) {
         Optional<Lecture> optional = lectureRepository.findById(lectureId);
         if (optional.isEmpty()) {
-            return;
+            return null;
         }
         Lecture lecture = optional.get();
-        if (lecture.getHasKeyword()) return;
+        if (lecture.getHasKeyword()) return null;
         String content = lecture.getContent();
         String[] keywords = keyword.separateWords(content);
+        List<KeywordResponseDto> list = new ArrayList<>();
+        KeywordResponseDto keywordResponseDto = new KeywordResponseDto(lectureId);
         for (String keyword : keywords) {
             Quiz quiz = Quiz.builder().word(keyword).build();
             quiz.setLecture(lecture);
             quizRepository.save(quiz);
+
+            keywordResponseDto.getKeywordList().add(new KeywordDto(quiz.getWord(), quiz.getMeaning()));
         }
         lecture.updateHasKey(true);
+        return keywordResponseDto;
     }
 }
