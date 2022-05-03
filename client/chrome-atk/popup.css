@@ -82,6 +82,7 @@ li {
   cursor: pointer;
 }
 
+
 .buttonContainer {
   display: flex;
   justify-content: space-around;
@@ -90,14 +91,32 @@ li {
 .button {
   display: none;
   text-align: center;
-  padding: 10px;
+  padding: 2px;
   border: 2px solid rgb(94, 116, 80);
   color: white;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: bold;
   cursor: pointer;
   background-color: rgb(128, 234, 111);
   border-radius: 5px;
+  width: -webkit-fill-available;
+  margin-top: 50px;
+}
+
+#start {
+  margin-right: 7.5px;
+}
+
+#logout {
+  margin-left: 7.5px;
+}
+
+#finish {
+  margin-right: 7.5px;
+}
+
+#cancel {
+  margin-left: 7.5px;
 }
 
 .button:hover {

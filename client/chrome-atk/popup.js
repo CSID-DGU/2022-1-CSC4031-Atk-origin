@@ -1,6 +1,3 @@
-let interval;
-let timeLeft;
-
 const displayStatus = function() { //function to handle the display of time and buttons
   chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
     const status = document.getElementById("status");
@@ -24,23 +21,8 @@ const displayStatus = function() { //function to handle the display of time and 
             chrome.storage.sync.set({
               maxTime: 10000
             });
-            timeLeft = 10000 - (Date.now() - response)
-          } else {
-            timeLeft = options.maxTime - (Date.now() - response)
           }
           status.innerHTML = "Tab is currently being captured";
-          if(options.limitRemoved) {
-            timeRem.innerHTML = `${parseTime(Date.now() - response)}`;
-            interval = setInterval(() => {
-              timeRem.innerHTML = `${parseTime(Date.now() - response)}`;
-            });
-          } else {
-            timeRem.innerHTML = `${parseTime(timeLeft)} remaining`;
-            interval = setInterval(() => {
-              timeLeft = timeLeft - 1000;
-              timeRem.innerHTML = `${parseTime(timeLeft)} remaining`;
-            }, 1000);
-          }
         });
         finishButton.style.display = "block";
         cancelButton.style.display = "block";
@@ -58,25 +40,6 @@ const logOut = function() {
   window.location.href="login.html";
 }
 
-const parseTime = function(time) { //function to display time remaining or time elapsed
-  let minutes = Math.floor((time/1000)/60);
-  let seconds = Math.floor((time/1000) % 60);
-  if (minutes < 10 && minutes >= 0) {
-    minutes = '0' + minutes;
-  } else if (minutes < 0) {
-    minutes = '00';
-  }
-  if (seconds < 10 && seconds >= 0) {
-    seconds = '0' + seconds;
-  } else if (seconds < 0) {
-    seconds = '00';
-  }
-  if(timeLeft <= 0){
-    chrome.runtime.sendMessage("stopCapture");
-  }
-  return `${minutes}:${seconds}`
-}
-
 //manipulation of the displayed buttons upon message from background
 chrome.runtime.onMessage.addListener((request, sender) => {
   chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
@@ -86,6 +49,7 @@ chrome.runtime.onMessage.addListener((request, sender) => {
     const startButton = document.getElementById('start');
     const finishButton = document.getElementById('finish');
     const cancelButton = document.getElementById('cancel');
+    const logOutButton = document.getElementById('logout');
     if(request.captureStarted && request.captureStarted === tabs[0].id) {
       chrome.storage.sync.get({
         maxTime: 10000,
@@ -95,27 +59,20 @@ chrome.runtime.onMessage.addListener((request, sender) => {
           chrome.storage.sync.set({
             maxTime: 10000
           });
-          timeLeft = 10000 - (Date.now() - request.startTime)
-        } else {
-          timeLeft = options.maxTime - (Date.now() - request.startTime)
         }
         status.innerHTML = "Tab is currently being captured";
-        timeRem.innerHTML = `${parseTime(timeLeft)} remaining`;
-        interval = setInterval(() => {
-          timeLeft = timeLeft - 1000;
-          timeRem.innerHTML = `${parseTime(timeLeft)} remaining`;
-        }, 1000);
       });
       finishButton.style.display = "block";
       cancelButton.style.display = "block";
       startButton.style.display = "none";
+      logOutButton.style.display = "none";
     } else if(request.captureStopped && request.captureStopped === tabs[0].id) {
       status.innerHTML = "";
       finishButton.style.display = "none";
       cancelButton.style.display = "none";
       startButton.style.display = "block";
+      logOutButton.style.display = "block";
       timeRem.innerHTML = "";
-      clearInterval(interval);
     } 
   });
 });
