@@ -32,11 +32,11 @@ public abstract class PythonManager {
 
             String result = getPythonStream(process.getInputStream());
 
-            boolean exitCode = process.waitFor(20, TimeUnit.SECONDS);
-//            int exitCode = process.waitFor();
-//            if (exitCode != 0) {
-//                throw new IllegalArgumentException("북마크 생성 도중 오류가 발생했습니다.");
-//            }
+//            boolean exitCode = process.waitFor(20, TimeUnit.SECONDS);
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                throw new IllegalArgumentException("북마크 생성 도중 오류가 발생했습니다.");
+            }
 
             return result;
         } catch (Exception e) {

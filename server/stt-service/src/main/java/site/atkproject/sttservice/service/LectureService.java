@@ -50,11 +50,15 @@ public class LectureService {
             return null;
         }
         Lecture lecture = optional.get();
-        if (lecture.getHasKeyword()) return null;
+        KeywordResponseDto keywordResponseDto = new KeywordResponseDto(lectureId);
+        if (lecture.getHasKeyword()) {
+            for (Quiz quiz : lecture.getQuizzes()) {
+                keywordResponseDto.getKeywordList().add(new KeywordDto(quiz.getWord(), quiz.getMeaning()));
+            }
+            return keywordResponseDto;
+        };
         String content = lecture.getContent();
         String[] keywords = keyword.separateWords(content);
-        List<KeywordResponseDto> list = new ArrayList<>();
-        KeywordResponseDto keywordResponseDto = new KeywordResponseDto(lectureId);
         for (String keyword : keywords) {
             Quiz quiz = Quiz.builder().word(keyword).build();
             quiz.setLecture(lecture);

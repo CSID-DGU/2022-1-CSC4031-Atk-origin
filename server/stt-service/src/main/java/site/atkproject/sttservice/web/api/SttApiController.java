@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import site.atkproject.sttservice.domain.lecture.Lecture;
 import site.atkproject.sttservice.service.SttService;
 import site.atkproject.sttservice.web.dto.request.SttStartRequestDto;
+import site.atkproject.sttservice.web.dto.response.SttResultResponseDto;
 import site.atkproject.sttservice.web.dto.response.SttStartResponseDto;
 
 import java.io.IOException;
@@ -28,11 +29,12 @@ public class SttApiController {
     }
 
     @PostMapping("/{lectureId}")
-    public String doStt(@RequestParam MultipartFile file, @PathVariable Long lectureId) throws IOException {
+    public SttResultResponseDto doStt(@RequestParam MultipartFile file, @PathVariable Long lectureId) throws IOException {
 
+        String result = "";
         if (!file.isEmpty()) {
-            sttService.doSTT(file, lectureId);
+            result = sttService.doSTT(file, lectureId);
         }
-        return "dispath post";
+        return new SttResultResponseDto(lectureId, result);
     }
 }

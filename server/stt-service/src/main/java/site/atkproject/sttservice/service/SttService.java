@@ -45,7 +45,7 @@ public class SttService {
     }
 
     @Transactional
-    public void doSTT(MultipartFile file, Long lectureId) throws IOException {
+    public String doSTT(MultipartFile file, Long lectureId) throws IOException {
 
         String fullPath = getFullPath(file);
         Optional<Lecture> optional = lectureRepository.findById(lectureId);
@@ -59,6 +59,7 @@ public class SttService {
         String sttedContent = pythonSTT.getSTT(fileName);
         lecture.updateContent(sttedContent);
         boolean isDeleted = deleteFile(fullPath);
+        return sttedContent;
     }
 
     private void saveFile(MultipartFile file, String fullPath) throws IOException {
