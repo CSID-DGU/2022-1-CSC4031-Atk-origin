@@ -6,7 +6,9 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MariaDB103Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
+    show-sql: true
+
 
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver

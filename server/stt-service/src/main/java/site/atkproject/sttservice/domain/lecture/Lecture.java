@@ -3,25 +3,28 @@ package site.atkproject.sttservice.domain.lecture;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.annotation.CreatedDate;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
+import site.atkproject.sttservice.domain.BaseTimeEntity;
 import site.atkproject.sttservice.domain.quiz.Quiz;
 import site.atkproject.sttservice.domain.user.User;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
 @Getter
+@DynamicInsert
 @Entity
-public class Lecture {
+public class Lecture extends BaseTimeEntity {
 
     @Id
     @GeneratedValue
     @Column(name = "lecture_id")
     private Long id;
+
+    private String titie;
 
     @Lob
     private String content;
@@ -29,6 +32,7 @@ public class Lecture {
     @Lob
     private String translation;
 
+    @ColumnDefault(value = "0")
     private Boolean hasKeyword;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -38,12 +42,9 @@ public class Lecture {
     @OneToMany(mappedBy = "lecture")
     private List<Quiz> quizzes = new ArrayList<>();
 
-    @CreatedDate
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
     @Builder
-    public Lecture(String content) {
+    public Lecture(String title, String content) {
+        this.titie = title;
         this.content = content;
     }
 
@@ -59,7 +60,16 @@ public class Lecture {
         this.hasKeyword = bool;
     }
 
+    public void updateContent(String content) {
+        this.content += " " + content;
+    }
+
     public void updateTranslation(String text) {
         this.translation = text;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        this.content = this.content == null ? "" : this.content;
     }
 }

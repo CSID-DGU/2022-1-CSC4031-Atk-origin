@@ -3,7 +3,10 @@ package site.atkproject.sttservice.web.api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import site.atkproject.sttservice.service.LectureService;
+import site.atkproject.sttservice.web.dto.response.KeywordResponseDto;
 import site.atkproject.sttservice.web.dto.response.TranslationResponseDto;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -18,8 +21,7 @@ public class LectureApiController {
     }
 
     @GetMapping("/{lectureId}/keyword")
-    public String makeKeyword(@PathVariable Long lectureId) {
-        lectureService.makeKeyword(lectureId);
-        return "";
+    public KeywordResponseDto makeKeyword(@PathVariable Long lectureId) {
+        return lectureService.makeKeyword(lectureId);
     }
 }
