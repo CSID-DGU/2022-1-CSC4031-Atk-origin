@@ -1,5 +1,6 @@
 let interval;
 let auth; 
+let serverUrl = "http://ec2-3-39-9-10.ap-northeast-2.compute.amazonaws.com/";
 
 const extend = function() { //helper function to merge objects
   let target = arguments[0],
@@ -212,7 +213,7 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
     mediaRecorder.onComplete = (recorder, blob) => {
       audioURL = window.URL.createObjectURL(blob);
       generateSave(audioURL);
-      sendAudio(blob);
+      //sendAudio(blob);
       mediaRecorder = null;
     }
     mediaRecorder.onEncodingProgress = (recorder, progress) => {
@@ -269,7 +270,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.currentTab){
     sendResponse(false);
   } else if (request === "startCapture") {
-    startCapture();
+    const api = "api/stt/" + request.type;
+    chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
+      let url = tabs[0].url;
+      let splitArr = url.split('/');
+      const num = splitArr.length;
+      var data = JSON.stringify({title: splitArr[num-1]});
+    sttRequest(api, data);
+    });
   }
 });
 
@@ -332,12 +340,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     const url = "api/user/" + request.type;
     var data = JSON.stringify({username: request.name, password: request.pw});
-    webRequest(url, data);
+    loginRequest(url, data);
   } else if (request.type === "logOut") {
     logOut();
   } else if (request.type === "checkUrl") {
     checkUrl();
-  }
+  } 
 });
 
 chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
@@ -356,7 +364,8 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 
 //https://stackoverflow.com/questions/40372051/upload-an-image-to-server-using-chrome-extensions
 function sendAudio(blob){
-  const baseUrl = "http://localhost/";
+  //const baseUrl = "http://localhost/";
+  const baseUrl = serverUrl;
   var formData = new FormData();
   formData.append("file", blob);
   const reqUrl = baseUrl + "api/stt";
@@ -373,8 +382,25 @@ function sendAudio(blob){
   request.send(formData);
 }
 
-const webRequest = function(url, data) {
-  const baseUrl = "http://localhost/";
+const sttRequest = function(url, data) {
+  const baseUrl = serverUrl;
+  console.log("[LOG] API REQUEST TO URL " + url);
+  const req = new XMLHttpRequest();
+  const reqUrl = baseUrl + url;
+  req.open("GET", reqUrl, true);
+  req.setRequestHeader("Authorization", auth);
+  req.setRequestHeader("Content-type", "application/json;charset=utf-8");
+  req.send(data);
+  req.onreadystatechange = function() { 
+    if (this.readyState === XMLHttpRequest.DONE ) {
+      onResponse(this, url);
+    }
+  }
+}
+
+const loginRequest = function(url, data) {
+  //const baseUrl = "http://localhost/";
+  const baseUrl = serverUrl;
   console.log("[LOG] API REQUEST TO URL " + url);
   const req = new XMLHttpRequest();
   const reqUrl = baseUrl + url;
@@ -391,8 +417,10 @@ const webRequest = function(url, data) {
 const onResponse = function(req, url) {
   if(url.toLowerCase().includes("login") === true){
     if(req.status === 200) {
-      console.log("[LOG] API RESPONSE FROM URL " + url + ": " + req.getResponseHeader("Authorization"));
-      auth = req.getResponseHeader("Authorization");
+      console.log("[LOG] API RESPONSE FROM URL");
+      alert(req.getAllResponseHeaders());
+      
+      //auth = req.getResponseHeader("Authorization");
       chrome.runtime.sendMessage("loginSuccess"); 
     } else {
       console.log("[LOG] API RESPONSE FROM URL " + url + ": FAILED TO LOGIN");
@@ -404,6 +432,10 @@ const onResponse = function(req, url) {
       chrome.runtime.sendMessage("signUpSuccess");
     } else {
       console.log("[LOG] API RESPONSE FROM URL " + url + ": FAILED TO JOIN");
+    }
+  } else if(url.toLowerCase().includes("stt") === true){
+    if(req.status === 200) {
+      startCapture();
     }
   }
 }
