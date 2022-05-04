@@ -22,7 +22,7 @@ public class SttApiController {
 
     private final SttService sttService;
 
-    @GetMapping("")
+    @PostMapping("")
     public SttStartResponseDto startStt(@RequestBody SttStartRequestDto sttStartRequestDto) {
         Lecture lecture = sttService.startStt(sttStartRequestDto);
         return SttStartResponseDto.builder().id(lecture.getId()).title(lecture.getTitie()).build();
