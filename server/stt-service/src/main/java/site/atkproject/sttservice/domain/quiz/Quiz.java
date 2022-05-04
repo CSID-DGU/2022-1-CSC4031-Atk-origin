@@ -23,6 +23,9 @@ public class Quiz extends BaseTimeEntity {
 
     private String word;
     private String meaning;
+    private String synonym;
+    private String antonym;
+    private String example;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
