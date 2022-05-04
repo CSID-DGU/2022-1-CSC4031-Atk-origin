@@ -2,6 +2,7 @@ let interval;
 let auth; 
 let serverUrl = "http://ec2-3-39-9-10.ap-northeast-2.compute.amazonaws.com/";
 let inProgress = false;
+let lectureId;
 
 const extend = function() { //helper function to merge objects
   let target = arguments[0],
@@ -215,7 +216,7 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
     mediaRecorder.onComplete = (recorder, blob) => {
       audioURL = window.URL.createObjectURL(blob);
       generateSave(audioURL);
-      //sendAudio(blob);
+      loadFile(blob);
       mediaRecorder = null;
     }
     mediaRecorder.onEncodingProgress = (recorder, progress) => {
@@ -281,10 +282,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       var data = JSON.stringify({title: url[0]});
       if(url[0] != "") {
         console.log("강연 제목: "+ url[0]);
-        startCapture();
-        //sttRequest(api, data);
+        sttRequest(api, data);
       } else {
         console.log("강연을 선택해주세요.");
+        inProgress = false;
       }
     });
   }
@@ -374,17 +375,32 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
   return true;
 });
 
+function loadFile(blob){
+  let fileName = 'hasFilename.wav';
+  let file = new File([blob], fileName,{type:"audio/wav", lastModified:new Date().getTime()}, 'utf-8');
+  let container = new DataTransfer(); 
+  container.items.add(file);
+  //document.querySelector('#file_input').files = container.files;
+  // document.querySelector('#status').files = container.files;
+  console.log(blob);
+  const baseUrl = serverUrl;
+  var formData = new FormData();
+  new Response(blob).arrayBuffer()
+  .then(console.log(this));
+}
+
 //https://stackoverflow.com/questions/40372051/upload-an-image-to-server-using-chrome-extensions
 function sendAudio(blob){
   //const baseUrl = "http://localhost/";
+  console.log(blob);
   const baseUrl = serverUrl;
   var formData = new FormData();
-  formData.append("file", blob);
-  const reqUrl = baseUrl + "api/stt";
+  formData.append("file", blob, "audioexample.wav");
+  const reqUrl = baseUrl + "api/stt/" + lectureId;
   var request = new XMLHttpRequest();
   request.open("POST", reqUrl, true);
   request.setRequestHeader("Authorization", auth);
-  request.setRequestHeader("Content-type", "multipart/form-data");
+  request.setRequestHeader("Content-type", "multipart/form-data; boundary=----WebKitFormBoundaryd7Et6HB7o93Jzi13");
 
   request.onreadystatechange = function() { 
     if (this.readyState === XMLHttpRequest.DONE ) {
@@ -446,6 +462,10 @@ const onResponse = function(req, url) {
     }
   } else if(url.toLowerCase().includes("stt") === true){
     if(req.status === 200) {
+      console.log(req.responseText);
+      const obj = JSON.parse(req.responseText);
+      console.log(obj.id);
+      lectureId = obj.id;
       startCapture();
     }
   }
