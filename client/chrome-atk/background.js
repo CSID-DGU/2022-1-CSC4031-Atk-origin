@@ -182,7 +182,7 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
 
     interval = setInterval(() => {
       timeLeft = timeLeft - 1000;
-      console.log("continue");
+      console.log("Recording in progress: " + timeLeft/1000 + " seconds left");
       if(timeLeft <= 0){
         stopCapture();
       }
@@ -270,13 +270,20 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.currentTab){
     sendResponse(false);
   } else if (request === "startCapture") {
-    const api = "api/stt/" + request.type;
+
+    const api = "api/stt/";
     chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
       let url = tabs[0].url;
       let splitArr = url.split('/');
       const num = splitArr.length;
-      var data = JSON.stringify({title: splitArr[num-1]});
-    sttRequest(api, data);
+      var data = JSON.stringify({title: url});
+      if(splitArr[num-1] != "") {
+        console.log("강연 제목: "+ splitArr[num-1]);
+        startCapture();
+        //sttRequest(api, data);
+      } else {
+        console.log("강연을 선택해주세요.");
+      }
     });
   }
 });
@@ -352,11 +359,12 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.name == 'setLoginCookie') {
     var obj = {username:request.username, password:request.password, authorization:auth}    
     chrome.storage.sync.set(obj, function() {
-      alert('로그인 성공');
+      console.log('로그인 성공');
     });           
   } else if (request.name == 'getLoginCookie') {
     chrome.storage.sync.get(function(data) {
       sendResponse({ username: data.username, password: data.password, authorization: data.authorization });
+      console.log("Login Cookie loaded - username: " + data.username + " password: "+ data.password + " authorization: " + data.authorization);
     })       
   }
   return true;
@@ -387,7 +395,7 @@ const sttRequest = function(url, data) {
   console.log("[LOG] API REQUEST TO URL " + url);
   const req = new XMLHttpRequest();
   const reqUrl = baseUrl + url;
-  req.open("GET", reqUrl, true);
+  req.open("POST", reqUrl, true);
   req.setRequestHeader("Authorization", auth);
   req.setRequestHeader("Content-type", "application/json;charset=utf-8");
   req.send(data);
@@ -418,9 +426,8 @@ const onResponse = function(req, url) {
   if(url.toLowerCase().includes("login") === true){
     if(req.status === 200) {
       console.log("[LOG] API RESPONSE FROM URL");
-      alert(req.getAllResponseHeaders());
-      
-      //auth = req.getResponseHeader("Authorization");
+      console.log(req.getAllResponseHeaders());
+      auth = req.getResponseHeader("Authorization");
       chrome.runtime.sendMessage("loginSuccess"); 
     } else {
       console.log("[LOG] API RESPONSE FROM URL " + url + ": FAILED TO LOGIN");
@@ -442,7 +449,7 @@ const onResponse = function(req, url) {
 
 const logOut = function() {
   console.log("[LOG] LOGOUT");
-  var toRemove = ["username","password"];
+  var toRemove = ["username","password","authorization"];
   chrome.storage.sync.remove(toRemove);
 }
 

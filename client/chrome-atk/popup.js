@@ -86,11 +86,15 @@ document.addEventListener('DOMContentLoaded', function() {
   const finishButton = document.getElementById('finish');
   const cancelButton = document.getElementById('cancel');
   const logOutButton= document.getElementById('logout');
-  startButton.onclick = () => {chrome.runtime.sendMessage("startCapture")};
+  startButton.onclick = () => {startProcess();};
   finishButton.onclick = () => {chrome.runtime.sendMessage("stopCapture")};
   cancelButton.onclick = () => {chrome.runtime.sendMessage("cancelCapture")};
   logOutButton.onclick = () => {logOut()};
   const version = document.getElementById("version");
   version.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
 
+  const startProcess = function() {  
+    chrome.runtime.sendMessage("startCapture");
+    window.location.href="stt.html";
+  }
 });
