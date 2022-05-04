@@ -1,6 +1,7 @@
 let interval;
 let auth; 
 let serverUrl = "http://ec2-3-39-9-10.ap-northeast-2.compute.amazonaws.com/";
+let inProgress = false;
 
 const extend = function() { //helper function to merge objects
   let target = arguments[0],
@@ -96,6 +97,7 @@ class Recorder {
 
   cancelRecording() {
     if(this.isRecording()) {
+      inProgress = false;
       this.input.disconnect();
       this.processor.disconnect();
       delete this.processor;
@@ -270,15 +272,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.currentTab){
     sendResponse(false);
   } else if (request === "startCapture") {
-
+    inProgress = true;
     const api = "api/stt/";
     chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
-      let url = tabs[0].url;
-      let splitArr = url.split('/');
+      let splitArr = tabs[0].url.split('/');
       const num = splitArr.length;
-      var data = JSON.stringify({title: url});
-      if(splitArr[num-1] != "") {
-        console.log("강연 제목: "+ splitArr[num-1]);
+      let url = splitArr[num-1].split('?');
+      var data = JSON.stringify({title: url[0]});
+      if(url[0] != "") {
+        console.log("강연 제목: "+ url[0]);
         startCapture();
         //sttRequest(api, data);
       } else {
@@ -366,6 +368,8 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
       sendResponse({ username: data.username, password: data.password, authorization: data.authorization });
       console.log("Login Cookie loaded - username: " + data.username + " password: "+ data.password + " authorization: " + data.authorization);
     })       
+  } else if(request.name === 'getStatus') {
+    sendResponse({status: inProgress});
   }
   return true;
 });

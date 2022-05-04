@@ -56,13 +56,19 @@ document.addEventListener('DOMContentLoaded', function() {
   function getCookie(){
     chrome.extension.sendMessage({name: 'getLoginCookie'}, function(response) {
       if(response.username){
-        window.location.href="popup.html";
-        if(loginFailMsg.style.display==="block"){
-          loginFailMsg.style.display="none";
-        }
-        if(emptyMsg.style.display==="block"){
-          emptyMsg.style.display="none";
-        }
+        chrome.extension.sendMessage({name: 'getStatus'}, function(response) {
+          if(response.status === true) {
+            window.location.href="stt.html";
+          } else {
+            window.location.href="popup.html";
+            if(loginFailMsg.style.display==="block"){
+              loginFailMsg.style.display="none";
+            }
+            if(emptyMsg.style.display==="block"){
+              emptyMsg.style.display="none";
+            }
+          }
+        })
       }
     })
   }
