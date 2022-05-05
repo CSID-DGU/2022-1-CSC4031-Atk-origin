@@ -2,6 +2,7 @@ let interval;
 let auth; 
 let serverUrl = "http://ec2-3-39-9-10.ap-northeast-2.compute.amazonaws.com/";
 let inProgress = false;
+let lectureId;
 
 const extend = function() { //helper function to merge objects
   let target = arguments[0],
@@ -102,6 +103,10 @@ class Recorder {
       this.processor.disconnect();
       delete this.processor;
       this.worker.postMessage({ command: "cancel" });
+      var subtitlesArr = [];
+      chrome.storage.local.set({subtitles: subtitlesArr}, function () {
+        console.log("subtitles reinitialized");
+      });
     }
   }
 
@@ -214,8 +219,8 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
     chrome.runtime.onMessage.addListener(onStopClick);
     mediaRecorder.onComplete = (recorder, blob) => {
       audioURL = window.URL.createObjectURL(blob);
-      generateSave(audioURL);
-      //sendAudio(blob);
+      //generateSave(audioURL);
+      postAudio(blob);
       mediaRecorder = null;
     }
     mediaRecorder.onEncodingProgress = (recorder, progress) => {
@@ -281,10 +286,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       var data = JSON.stringify({title: url[0]});
       if(url[0] != "") {
         console.log("강연 제목: "+ url[0]);
-        startCapture();
-        //sttRequest(api, data);
+        sttRequest(api, data);
       } else {
         console.log("강연을 선택해주세요.");
+        inProgress = false;
       }
     });
   }
@@ -370,28 +375,47 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     })       
   } else if(request.name === 'getStatus') {
     sendResponse({status: inProgress});
+  } else if(request.name === 'getSubtitles') {
+    console.log("loading subtitles");
+    chrome.storage.local.get('subtitles', function (result) {
+      sendResponse({subtitles: result.subtitles});
+    });
   }
   return true;
 });
 
-//https://stackoverflow.com/questions/40372051/upload-an-image-to-server-using-chrome-extensions
-function sendAudio(blob){
-  //const baseUrl = "http://localhost/";
+function postAudio(blob){
+  let fileName = 'stt_audio.wav';
   const baseUrl = serverUrl;
   var formData = new FormData();
-  formData.append("file", blob);
-  const reqUrl = baseUrl + "api/stt";
+  formData.append("file", blob, fileName);
+  const reqUrl = baseUrl + "api/stt/" + lectureId;
   var request = new XMLHttpRequest();
   request.open("POST", reqUrl, true);
   request.setRequestHeader("Authorization", auth);
-  request.setRequestHeader("Content-type", "multipart/form-data");
-
   request.onreadystatechange = function() { 
     if (this.readyState === XMLHttpRequest.DONE ) {
-      console.log(this.responseText);
+      if(this.status === 200) {
+        const obj = JSON.parse(this.responseText);
+        processSubtitles(obj.text);
+        console.log(obj.text);
+      } 
     }
   }
   request.send(formData);
+}
+
+const processSubtitles = function(data) {
+  chrome.storage.local.get({subtitles: []}, function (result) {
+    var subtitlesArr = result.subtitles;
+    subtitlesArr.push({subtitles: data});
+    chrome.storage.local.set({subtitles: subtitlesArr}, function () {
+      chrome.storage.local.get('subtitles', function (result) {
+        console.log(result.subtitles);
+        chrome.runtime.sendMessage({name:"subtitle", text:result.subtitles }); 
+      });
+    });
+});
 }
 
 const sttRequest = function(url, data) {
@@ -446,6 +470,14 @@ const onResponse = function(req, url) {
     }
   } else if(url.toLowerCase().includes("stt") === true){
     if(req.status === 200) {
+      console.log(req.responseText);
+      var subtitlesArr = [];
+      chrome.storage.local.set({subtitles: subtitlesArr}, function () {
+        console.log("subtitles reinitialized");
+      });
+      const obj = JSON.parse(req.responseText);
+      console.log(obj.id);
+      lectureId = obj.id;
       startCapture();
     }
   }

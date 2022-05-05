@@ -23,7 +23,9 @@
     "tabs",
     "downloads",
     "storage",
-    "http://localhost/"
+    "http://localhost/",
+    "<all_urls>",
+    "http://ec2-3-39-9-10.ap-northeast-2.compute.amazonaws.com/"
   ],
   "commands": {
     "start": {
