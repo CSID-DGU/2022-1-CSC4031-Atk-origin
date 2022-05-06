@@ -103,10 +103,10 @@ class Recorder {
       this.processor.disconnect();
       delete this.processor;
       this.worker.postMessage({ command: "cancel" });
-      var subtitlesArr = [];
-      chrome.storage.local.set({subtitles: subtitlesArr}, function () {
-        console.log("subtitles reinitialized");
-      });
+      // var subtitlesArr = [];
+      // chrome.storage.local.set({subtitles: subtitlesArr}, function () {
+      //   console.log("subtitles reinitialized");
+      // });
     }
   }
 
@@ -277,6 +277,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.currentTab){
     sendResponse(false);
   } else if (request === "startCapture") {
+    var subtitlesArr = [];
+    chrome.storage.local.set({subtitles: subtitlesArr}, function () {
+      console.log("subtitles reinitialized");
+    });
     inProgress = true;
     const api = "api/stt/";
     chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
@@ -380,6 +384,9 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     chrome.storage.local.get('subtitles', function (result) {
       sendResponse({subtitles: result.subtitles});
     });
+  } else if(request.name === 'getTranscript') {
+    var url = "api/lecture/" + lectureId + "/translate";
+    getTranslated(url);
   }
   return true;
 });
@@ -450,6 +457,22 @@ const loginRequest = function(url, data) {
   }
 }
 
+const getTranslated = function(url) {
+  //const baseUrl = "http://localhost/";
+  const baseUrl = serverUrl;
+  console.log("[LOG] API REQUEST TO URL " + url);
+  const req = new XMLHttpRequest();
+  const reqUrl = baseUrl + url;
+  req.open("GET", reqUrl, true);
+  req.setRequestHeader("Authorization", auth);
+  req.send();
+  req.onreadystatechange = function() { 
+    if (this.readyState === XMLHttpRequest.DONE ) {
+      onResponse(this, url);
+    }
+  }
+}
+
 const onResponse = function(req, url) {
   if(url.toLowerCase().includes("login") === true){
     if(req.status === 200) {
@@ -471,22 +494,38 @@ const onResponse = function(req, url) {
   } else if(url.toLowerCase().includes("stt") === true){
     if(req.status === 200) {
       console.log(req.responseText);
-      var subtitlesArr = [];
-      chrome.storage.local.set({subtitles: subtitlesArr}, function () {
-        console.log("subtitles reinitialized");
-      });
       const obj = JSON.parse(req.responseText);
       console.log(obj.id);
       lectureId = obj.id;
       startCapture();
     }
+  } else if(url.toLowerCase().includes("translate") === true){
+    if(req.status === 200) {
+      const obj = JSON.parse(req.responseText);
+      printTranscript(obj.translatedText);
+    }
   }
+}
+
+const printTranscript = function(translated) {
+  chrome.storage.local.get('subtitles', function (result) {
+    var string = "Transcript<br><br>";
+    for (var i = 0; i < result.subtitles.length; i++) {
+      string += result.subtitles[i].subtitles + " ";
+    }
+    string += "<br><br>Translated<br><br>" + translated;
+    chrome.runtime.sendMessage({name: "printTranslated", text: string});
+  });
 }
 
 const logOut = function() {
   console.log("[LOG] LOGOUT");
   var toRemove = ["username","password","authorization"];
   chrome.storage.sync.remove(toRemove);
+  var subtitlesArr = [];
+  chrome.storage.local.set({subtitles: subtitlesArr}, function () {
+    console.log("subtitles reinitialized");
+  });
 }
 
 // Open new tab if url doesn't contain ted.com
