@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
   subtitleBox.innerHTML = "";
   const stopProcess = function() {  
     chrome.runtime.sendMessage("cancelCapture");
-    window.location.href="popup.html";
+    //window.location.href="popup.html";
+    showTranscript();
   }
 
   const setSubtitles = function(subtitles) {
@@ -19,12 +20,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  const showTranscript = function() {
+    chrome.extension.sendMessage({name: 'getTranscript'});
+  }
+
   chrome.extension.sendMessage({name: 'getSubtitles'}, function(response) {
     setSubtitles(response.subtitles);
   })
 
   chrome.runtime.onMessage.addListener((request, sender) => {
-    setSubtitles(request.text); 
+    if(request.name === 'printTranslated') {
+      subtitleBox.innerHTML = request.text;
+    } else if(request.name === 'subtitle') {
+      setSubtitles(request.text);
+    }
   });  
 });
 
