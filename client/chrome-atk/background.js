@@ -387,6 +387,9 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
   } else if(request.name === 'getTranscript') {
     var url = "api/lecture/" + lectureId + "/translate";
     getTranslated(url);
+  } else if(request.name === 'getKeywords') {
+    var url = "api/lecture/" + lectureId + "/keyword";
+    getTranslated(url);
   }
   return true;
 });
@@ -504,6 +507,11 @@ const onResponse = function(req, url) {
       const obj = JSON.parse(req.responseText);
       printTranscript(obj.translatedText);
     }
+  } else if(url.toLowerCase().includes("keyword") === true) {
+    if(req.status === 200) {
+      const obj = JSON.parse(req.responseText);
+      printKeywords(obj.keywordList);
+    }
   }
 }
 
@@ -516,6 +524,10 @@ const printTranscript = function(translated) {
     string += "<br><br>Translated<br><br>" + translated;
     chrome.runtime.sendMessage({name: "printTranslated", text: string});
   });
+}
+
+const printKeywords = function(list) {
+  chrome.runtime.sendMessage({name: "printKeywords", keywordList: list});
 }
 
 const logOut = function() {
