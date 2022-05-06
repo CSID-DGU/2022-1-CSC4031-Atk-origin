@@ -1,12 +1,22 @@
 document.addEventListener('DOMContentLoaded', function() {
   const finishButton = document.getElementById('finish');
+  const studyButton = document.getElementById('study');
   const subtitleBox = document.getElementById('subtitleBox');
   finishButton.onclick = () => {stopProcess()};
+  studyButton.style.display = 'none';
+  studyButton.onclick = () => {showKeywords()};
   subtitleBox.innerHTML = "";
+
   const stopProcess = function() {  
     chrome.runtime.sendMessage("cancelCapture");
     //window.location.href="popup.html";
+    studyButton.style.display = 'block';
+    finishButton.style.display = 'none';
     showTranscript();
+  }
+
+  const showKeywords = function() {
+    chrome.runtime.sendMessage({name: "getKeywords"});
   }
 
   const setSubtitles = function(subtitles) {
@@ -33,6 +43,14 @@ document.addEventListener('DOMContentLoaded', function() {
       subtitleBox.innerHTML = request.text;
     } else if(request.name === 'subtitle') {
       setSubtitles(request.text);
+    } else if(request.name === 'printKeywords') {
+      subtitleBox.innerHTML = "Keywords<br><br>";
+      console.log("show keywords");
+      for (var i = 0; i < request.keywordList.length; i++) {
+        if(request.keywordList[i].word != "") {
+          subtitleBox.innerHTML += i + 1 + ". " + request.keywordList[i].word + "<br><br>";
+        }
+      }
     }
   });  
 });
