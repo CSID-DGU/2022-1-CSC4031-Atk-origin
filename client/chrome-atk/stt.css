@@ -3,6 +3,7 @@ body, h2 {
 }
 
 body {
+  position: relative;
   margin: 15px 15px 15px 15px;
   min-width:360px;
   min-height:480px;
@@ -49,6 +50,18 @@ body {
   background: #f4f8f9;
   width: 345px;
   overflow: auto;
+  height: 310px;
+}
+
+#loading {
+  text-align: center;  
+  display: block;  
+  margin-left: auto;  
+  margin-right: auto;  
+  margin-top: auto;
+  margin-bottom: auto;
+  padding: 5px;  
+  width: 300px;
   height: 300px;
 }
 
@@ -78,6 +91,8 @@ body {
 
 .button {
   display: block;
+  position: absolute;
+  bottom: 0px;
   text-align: center;
   padding: 2px;
   border: 2px solid rgb(94, 116, 80);

@@ -5,11 +5,13 @@
   "description": "This extension converts English speech to text in real-time to assist English learners",
   "version": "0.0.1",
   "icons": {
-    "128":"icon.png"
-    },
-
+    "128":"images/icon.png"
+  },
+  "web_accessible_resources":[
+    "images/loading.gif"
+  ],
   "browser_action": {
-    "default_icon": "icon.png",
+    "default_icon": "images/icon.png",
     "default_popup": "login.html",
     "default_title": "ATK Speech-to-Text"
   },
