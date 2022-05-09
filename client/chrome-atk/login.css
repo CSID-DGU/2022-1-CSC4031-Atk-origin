@@ -3,6 +3,7 @@ body, h2 {
 }
 
 body {
+  position:relative;
   min-width:360px;
   min-height:480px;
   margin: 15px 15px 15px 15px;
@@ -104,8 +105,8 @@ input{
   float: right;
   font-family: sans-serif;
   position: absolute;
-  right: 15px;
-  bottom: 15px;
+  right: 0px;
+  bottom: 0px;
   color: blue;
   text-decoration: underline;
   cursor: pointer;
