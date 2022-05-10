@@ -229,7 +229,7 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
     const stopCapture = function() {
       let endTabId;
 
-      console.log("[LOG] STOPPING AUDIO CAPTURE");
+      console.log("[LOG] stopping current capture");
       //check to make sure the current tab is the tab being captured
       clearInterval(interval);
       mediaRecorder.finishRecording();  
@@ -278,7 +278,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendResponse(false);
   } else if (request === "startCapture") {
     var subtitlesArr = [];
-    chrome.storage.local.set({subtitles: subtitlesArr}, function () {
+    chrome.storage.sync.set({subtitles: subtitlesArr}, function () {
       console.log("subtitles reinitialized");
     });
     inProgress = true;
@@ -290,7 +290,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       var data = JSON.stringify({title: url[0]});
       if(url[0] != "") {
         console.log("강연 제목: "+ url[0]);
-        sttRequest(api, data);
+        sendJson(api, data);
       } else {
         console.log("강연을 선택해주세요.");
         inProgress = false;
@@ -300,7 +300,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 const startCapture = function() {
-  console.log("[LOG] STARTING AUDIO CAPTURE");
+  console.log("[LOG] starting audio capture");
   chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
     if(!sessionStorage.getItem(tabs[0].id)) {
       sessionStorage.setItem(tabs[0].id, Date.now());
@@ -323,7 +323,7 @@ const startCapture = function() {
 };
 
 const restartCapture = function(id) {
-  console.log("[LOG] RESTARTING AUDIO CAPTURE");
+  console.log("[LOG] restarting audio capture");
   if(!sessionStorage.getItem(id)) {
     sessionStorage.setItem(id, Date.now());
     chrome.storage.sync.get({
@@ -358,7 +358,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     const url = "api/user/" + request.type;
     var data = JSON.stringify({username: request.name, password: request.pw});
-    loginRequest(url, data);
+    sendJson(url, data);
   } else if (request.type === "logOut") {
     logOut();
   } else if (request.type === "checkUrl") {
@@ -370,7 +370,6 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.name == 'setLoginCookie') {
     var obj = {username:request.username, password:request.password, authorization:auth}    
     chrome.storage.sync.set(obj, function() {
-      console.log('로그인 성공');
     });           
   } else if (request.name == 'getLoginCookie') {
     chrome.storage.sync.get(function(data) {
@@ -381,15 +380,15 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     sendResponse({status: inProgress});
   } else if(request.name === 'getSubtitles') {
     console.log("loading subtitles");
-    chrome.storage.local.get('subtitles', function (result) {
+    chrome.storage.sync.get('subtitles', function (result) {
       sendResponse({subtitles: result.subtitles});
     });
   } else if(request.name === 'getTranscript') {
     var url = "api/lecture/" + lectureId + "/translate";
-    getTranslated(url);
+    getJson(url);
   } else if(request.name === 'getKeywords') {
     var url = "api/lecture/" + lectureId + "/keyword";
-    getTranslated(url);
+    getJson(url);
   }
   return true;
 });
@@ -416,11 +415,11 @@ function postAudio(blob){
 }
 
 const processSubtitles = function(data) {
-  chrome.storage.local.get({subtitles: []}, function (result) {
+  chrome.storage.sync.get({subtitles: []}, function (result) {
     var subtitlesArr = result.subtitles;
     subtitlesArr.push({subtitles: data});
-    chrome.storage.local.set({subtitles: subtitlesArr}, function () {
-      chrome.storage.local.get('subtitles', function (result) {
+    chrome.storage.sync.set({subtitles: subtitlesArr}, function () {
+      chrome.storage.sync.get('subtitles', function (result) {
         console.log(result.subtitles);
         chrome.runtime.sendMessage({name:"subtitle", text:result.subtitles }); 
       });
@@ -428,49 +427,34 @@ const processSubtitles = function(data) {
 });
 }
 
-const sttRequest = function(url, data) {
-  const baseUrl = serverUrl;
-  console.log("[LOG] API REQUEST TO URL " + url);
+const sendJson = function(url, data) {
+  console.log("[LOG] sending request to " + url);
   const req = new XMLHttpRequest();
-  const reqUrl = baseUrl + url;
+  const reqUrl = serverUrl + url;
   req.open("POST", reqUrl, true);
-  req.setRequestHeader("Authorization", auth);
+  if(url.toLowerCase().includes("stt")){
+    req.setRequestHeader("Authorization", auth);
+  }
   req.setRequestHeader("Content-type", "application/json;charset=utf-8");
   req.send(data);
   req.onreadystatechange = function() { 
     if (this.readyState === XMLHttpRequest.DONE ) {
+      console.log("[LOG] received response from " + url + ": " + this.responseText);
       onResponse(this, url);
     }
   }
 }
 
-const loginRequest = function(url, data) {
-  //const baseUrl = "http://localhost/";
-  const baseUrl = serverUrl;
-  console.log("[LOG] API REQUEST TO URL " + url);
+const getJson = function(url) {
+  console.log("[LOG] sending request to " + url);
   const req = new XMLHttpRequest();
-  const reqUrl = baseUrl + url;
-  req.open("POST", reqUrl, true);
-  req.setRequestHeader("Content-type", "application/json;charset=utf-8");
-  req.send(data);
-  req.onreadystatechange = function() { 
-    if (this.readyState === XMLHttpRequest.DONE ) {
-      onResponse(this, url);
-    }
-  }
-}
-
-const getTranslated = function(url) {
-  //const baseUrl = "http://localhost/";
-  const baseUrl = serverUrl;
-  console.log("[LOG] API REQUEST TO URL " + url);
-  const req = new XMLHttpRequest();
-  const reqUrl = baseUrl + url;
+  const reqUrl = serverUrl + url;
   req.open("GET", reqUrl, true);
   req.setRequestHeader("Authorization", auth);
   req.send();
   req.onreadystatechange = function() { 
-    if (this.readyState === XMLHttpRequest.DONE ) {
+    if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+      console.log("[LOG] received response from " + url + ": " + this.responseText);
       onResponse(this, url);
     }
   }
@@ -479,44 +463,35 @@ const getTranslated = function(url) {
 const onResponse = function(req, url) {
   if(url.toLowerCase().includes("login") === true){
     if(req.status === 200) {
-      console.log("[LOG] API RESPONSE FROM URL");
-      console.log(req.getAllResponseHeaders());
       auth = req.getResponseHeader("Authorization");
       chrome.runtime.sendMessage("loginSuccess"); 
     } else {
-      console.log("[LOG] API RESPONSE FROM URL " + url + ": FAILED TO LOGIN");
       chrome.runtime.sendMessage("loginFail"); 
     }
   } else if(url.toLowerCase().includes("join") === true){
     if(req.status === 200) {
-      console.log("[LOG] API RESPONSE FROM URL " + url + ": " + req.responseText);
       chrome.runtime.sendMessage("signUpSuccess");
     } else {
-      console.log("[LOG] API RESPONSE FROM URL " + url + ": FAILED TO JOIN");
+      chrome.runtime.sendMessage("signUpFail");
     }
   } else if(url.toLowerCase().includes("stt") === true){
     if(req.status === 200) {
-      console.log(req.responseText);
       const obj = JSON.parse(req.responseText);
       console.log(obj.id);
       lectureId = obj.id;
       startCapture();
     }
   } else if(url.toLowerCase().includes("translate") === true){
-    if(req.status === 200) {
-      const obj = JSON.parse(req.responseText);
-      printTranscript(obj.translatedText);
-    }
+    const obj = JSON.parse(req.responseText);
+    printTranscript(obj.translatedText);
   } else if(url.toLowerCase().includes("keyword") === true) {
-    if(req.status === 200) {
-      const obj = JSON.parse(req.responseText);
-      printKeywords(obj.keywordList);
-    }
+    const obj = JSON.parse(req.responseText);
+    printKeywords(obj.keywordList);
   }
 }
 
 const printTranscript = function(translated) {
-  chrome.storage.local.get('subtitles', function (result) {
+  chrome.storage.sync.get('subtitles', function (result) {
     var string = "Transcript<br><br>";
     for (var i = 0; i < result.subtitles.length; i++) {
       string += result.subtitles[i].subtitles + " ";
@@ -531,18 +506,18 @@ const printKeywords = function(list) {
 }
 
 const logOut = function() {
-  console.log("[LOG] LOGOUT");
+  console.log("[LOG] clear login cookies");
   var toRemove = ["username","password","authorization"];
   chrome.storage.sync.remove(toRemove);
   var subtitlesArr = [];
-  chrome.storage.local.set({subtitles: subtitlesArr}, function () {
+  chrome.storage.sync.set({subtitles: subtitlesArr}, function () {
     console.log("subtitles reinitialized");
   });
 }
 
 // Open new tab if url doesn't contain ted.com
 const checkUrl = function() {
-  console.log("[LOG] Check URL");
+  console.log("[LOG] verify url");
   chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
     let url = tabs[0].url;
     if(url.toLowerCase().includes("ted.com") === false) {
