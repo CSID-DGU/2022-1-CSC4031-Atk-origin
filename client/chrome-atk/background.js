@@ -4,6 +4,11 @@ let serverUrl = "http://ec2-3-39-9-10.ap-northeast-2.compute.amazonaws.com/";
 let inProgress = false;
 let lectureId;
 
+chrome.browserAction.onClicked.addListener(function(tab){
+  chrome.tabs.sendMessage(tab.id,"toggle");
+  checkUrl();
+});
+
 const extend = function() { //helper function to merge objects
   let target = arguments[0],
       sources = [].slice.call(arguments, 1);
@@ -362,7 +367,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   } else if (request.type === "logOut") {
     logOut();
   } else if (request.type === "checkUrl") {
-    checkUrl();
+    //checkUrl();
   } 
 });
 

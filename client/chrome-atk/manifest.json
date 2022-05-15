@@ -7,12 +7,19 @@
   "icons": {
     "128":"images/icon.png"
   },
+  "content_scripts": [{
+    "matches": [
+        "https://www.ted.com/*",
+        "http://www.ted.com/*"
+    ],
+    "js": ["content-script.js"]
+}],
   "web_accessible_resources":[
-    "images/loading.gif"
+    "images/loading.gif",
+    "login.html"
   ],
   "browser_action": {
     "default_icon": "images/icon.png",
-    "default_popup": "login.html",
     "default_title": "ATK Speech-to-Text"
   },
   "options_page": "options.html",
@@ -25,6 +32,7 @@
     "tabs",
     "downloads",
     "storage",
+    "activeTab",
     "http://localhost/",
     "<all_urls>",
     "http://ec2-3-39-9-10.ap-northeast-2.compute.amazonaws.com/"
