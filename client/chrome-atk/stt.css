@@ -7,7 +7,7 @@ body {
   background: white;
   margin: 15px 15px 15px 15px;
   min-width:360px;
-  min-height:480px;
+  min-height:800px;
 }
 
 .header {
@@ -49,9 +49,9 @@ body {
   font: 14px sans-serif;
   color:rgb(94, 116, 80);
   background: #f4f8f9;
-  width: 345px;
+  width: -webkit-fill-available;
   overflow: auto;
-  height: 310px;
+  height: 630px;
 }
 
 #loading {
@@ -104,7 +104,6 @@ body {
   background-color: rgb(128, 234, 111);
   border-radius: 5px;
   width: -webkit-fill-available;
-  margin-top: 20px;
 }
 
 .button:hover {

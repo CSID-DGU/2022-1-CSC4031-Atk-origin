@@ -7,7 +7,7 @@ body {
   background: white;
   margin: 15px 15px 15px 15px;
   min-width:360px;
-  min-height:480px;
+  min-height:800px;
 }
 
 .header {
@@ -54,8 +54,8 @@ ul {
   float: right;
   font-family: sans-serif;
   position: absolute;
-  right: 15px;
-  bottom: 15px;
+  right: 0px;
+  bottom: 0px;
 }
 
 .links p {
@@ -64,10 +64,12 @@ ul {
   cursor: pointer;
 }
 
-
 .buttonContainer {
   display: flex;
   justify-content: space-around;
+  width: -webkit-fill-available;
+  position: absolute;
+  bottom: 40px;
 }
 
 .button {
@@ -82,7 +84,6 @@ ul {
   background-color: rgb(128, 234, 111);
   border-radius: 5px;
   width: -webkit-fill-available;
-  margin-top: 50px;
 }
 
 #start {
@@ -96,4 +97,23 @@ ul {
 .button:hover {
   color: white;
   background-color: rgb(110, 179, 64);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: #c9dde1;
+}
+
+::-webkit-scrollbar-thum:hover {
+  background: #999;
 }
