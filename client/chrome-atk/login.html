@@ -1,39 +1,36 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>ATK Speech-to-Text</title>
+    <title>ATK Kong Teacher</title>
     <script src="login.js"></script>
     <link rel="stylesheet" href="login.css" type="text/css">
   </head>
   <body>
     <div class="header">
-      <img id="icon" src="./images/icon.png"/> 
-      <div class="logoTitle">
-        <h1>Kong Teacher</h1>
-        <img id="logo" src="./images/bean.png"/>
-      </div>      
+      <img id="logo", src="./images/logo.png"/>     
     </div>
-    <ul id="title">Login
-      <li id="startKey">Please sign in to continue</li>
+    <ul id="loginHeading">Login
+      <li>Please sign in to continue</li>
     </ul>
-    <ul id="signUpTitle">Sign up
-      <li id="signUpMsg">Create a new account</li>
+    <ul id="signupHeading">Sign up
+      <li>Create a new account</li>
     </ul>
-    <input type="text" placeholder="Enter user name" id="name" name="name" required
-      minlength="4" maxlength="16">
+    <div class="inputContainer">
+      <input type="text" placeholder="Enter user name" id="name" name="name" required
+      minlength="4" maxlength="32">
     <input type="password" placeholder="Enter password" id="pw" name="pw" required
-      minlength="4" maxlength="16">
+      minlength="4" maxlength="32">
+    </div>
     <div class="buttonContainer">
-      <div class="button" id="login">Login</div>
-      <div class="button" id="signupButton">Sign up</div>
-      <div class="button" id="cancelButton">Cancel</div>
+      <div class="button" id="loginBtn">Login</div>
+      <div class="button" id="signupBtn">Sign up</div>
+      <div class="button" id="cancelBtn">Cancel</div>
     </div>
-    <p class="extra" id="msg">Don't have an account?</p>
-    <div class="links">
-      <p id="signUpLink">Sign up</p>
-      <p id="version">ver 0.0.1</p>
+    <div class="extra">
+      <p id="signupText">Don't have an account?</p>
+      <p id="signupLink">Sign up</p>
     </div>
-    <p class="errorMsg" id="loginFailMsg">User name or password is incorrect.</p>
-    <p class="errorMsg" id="emptyMsg">User name or password is empty.</p>
+    <p id="errorMessage"></p>
+    <p id="gitLink">ver 1.0.0</p>
   </body>
 </html>

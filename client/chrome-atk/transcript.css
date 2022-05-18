@@ -26,13 +26,21 @@ body {
 }
 
 ul {
-  margin-top: 15px;
-  margin-bottom: 15px;
+  margin-top: 0px;
+  margin-bottom: 0px;
   font-size: 20px;
   font-weight: bold;
   list-style: none;
   padding: 0;
   color: rgb(94, 116, 80);
+}
+
+.scrollContainer {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 15px;
+  margin-bottom: 15px;
+  margin-top: 15px;
 }
 
 .scrollBox {
@@ -44,8 +52,7 @@ ul {
   background: #f4f8f9;
   width: -webkit-fill-available;
   overflow: auto;
-  height: 600px;
-  margin-bottom: 15px;
+  height: 267px;
 }
 
 #loading {
