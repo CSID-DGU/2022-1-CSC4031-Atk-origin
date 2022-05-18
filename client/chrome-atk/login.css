@@ -5,9 +5,9 @@ body, h2 {
 body {
   position:relative;
   background: white;
-  min-width:360px;
-  min-height:480px;
   margin: 15px 15px 15px 15px;
+  min-width:360px;
+  min-height:800px;
 }
 
 .header {
@@ -144,4 +144,23 @@ input{
 .button:hover {
   color: white;
   background-color: rgb(110, 179, 64);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: #c9dde1;
+}
+
+::-webkit-scrollbar-thum:hover {
+  background: #999;
 }
