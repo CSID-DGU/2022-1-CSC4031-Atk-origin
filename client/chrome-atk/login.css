@@ -3,11 +3,17 @@ body, h2 {
 }
 
 body {
-  position: relative;
+  position: absolute;
   background: white;
-  margin: 15px 15px 15px 15px;
-  min-width: 360px;
-  min-height: 800px;
+  min-height: 600px;
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  flex-direction: column;
+  margin: 0px;
+}
+.wrapper {
+  margin: 15px;
 }
 
 .header {
@@ -22,13 +28,8 @@ body {
   float: left;
   width: 370px;
   height: 69px;
+  cursor: pointer;
   image-rendering: -webkit-optimize-contrast;
-}
-
-.header h1 {
-  position: relative;
-  float: left;
-  margin: 0; 
 }
 
 ul {
@@ -52,7 +53,7 @@ li {
   display: flex;
   flex-wrap: wrap;
   row-gap: 15px;
-  margin-bottom: 60px;
+  margin-bottom: 15px;
 }
 
 input{
@@ -75,25 +76,24 @@ input{
 }
 
 .extra {
-  float: left;
+  position: absolute;
+  bottom: 65px;
   font-family: sans-serif;
   font-weight: bold;
-  position: relative;
-  width: -webkit-fill-available;
+  margin: 0;
 }
 
 #signupText {
   float: left;
-  color: rgb(94, 116, 80);
-  margin-top: 0px;
-  margin-bottom: 15px;
+  color: rgb(94, 116, 80);;
+  margin: 0;
 }
 
 #signupLink {
   float: left;
   margin-left:10px;
-  margin-top: 0px;
-  margin-bottom: 15px;
+  margin-top: 0;
+  margin-bottom: 0;
   color: rgb(110, 179, 64);
   text-decoration: underline;
   cursor: pointer;
@@ -106,28 +106,16 @@ input{
   font-weight: bold;
   position: relative;
   margin-top: 0px;
-  margin-bottom: 15px;
-}
-
-#gitLink {
-  display: flex;
-  float: right;
-  font-family: sans-serif;
-  position: absolute;
-  right: 0px;
-  bottom: 0px;
-  margin-top: 0px;
-  margin-bottom: 0px;
-  color: blue;
-  text-decoration: underline;
-  cursor: pointer;
 }
 
 .buttonContainer {
   display: flex;
   justify-content: space-around;
   gap: 15px;
-  margin-bottom: 15px;
+  position: absolute;
+  bottom: 15px;
+  left: 15px;
+  right: 15px;
 }
 
 .button {

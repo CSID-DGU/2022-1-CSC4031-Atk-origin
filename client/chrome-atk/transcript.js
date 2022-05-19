@@ -1,55 +1,43 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const transcript = document.getElementById('transcript');
-    const translated = document.getElementById('translated');
+    const transcriptContent = document.getElementById('transcriptContent');
+    const translatedContent = document.getElementById('translatedContent');
     const studyButton = document.getElementById('study');
     const backButton = document.getElementById('back');
     const transcriptHeading = document.getElementById('transcriptHeading');
     const translatedHeading = document.getElementById('translatedHeading');
     const loading = document.getElementById('loading');
-    studyButton.style.display = 'none';
-    backButton.style.display = 'none';
-    studyButton.onclick = () => {showKeywords()};
+    const logo = document.getElementById("logo");
+    logo.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
+    
+    studyButton.style.display = 'block';
+    studyButton.onclick = () => {window.location.href="keyword.html"};
     backButton.onclick = () => {window.location.href="popup.html"};
-    transcript.innerHTML = "";
-    translated.innerHTML = "";
-    transcriptHeading.style.display = 'none';
-    translatedHeading.style.display = 'none';
-    transcript.style.display = 'none';
-    translated.style.display = 'none';
-    loading.style.display = 'block';
-    chrome.extension.sendMessage({name: 'getTranscript'});
-  
-    const showKeywords = function() {
-      loading.style.display = 'block';
-      transcript.style.display = 'none';
-      translated.style.display = 'none';
-      chrome.runtime.sendMessage({name: "getKeywords"});
-    }
+    transcriptContent.innerHTML = "";
+    translatedContent.innerHTML = "";
+    transcriptHeading.style.display = 'block';
+    translatedHeading.style.display = 'block';
+    transcriptContent.style.display = 'block';
+    translatedContent.style.display = 'block';
+    loading.style.display = 'none';
+
+    // transcriptHeading.style.display = 'none';
+    // translatedHeading.style.display = 'none';
+    // transcriptContent.style.display = 'none';
+    // translatedContent.style.display = 'none';
+    // loading.style.display = 'block';
+    
+    //chrome.extension.sendMessage({name: 'getTranscript'});
 
     chrome.runtime.onMessage.addListener((request, sender) => {
       if(request.name === 'printTranslated') {
         loading.style.display = 'none';
-        transcript.style.display = 'block';
-        translated.style.display = 'block';
+        transcriptContent.style.display = 'block';
+        translatedContent.style.display = 'block';
         transcriptHeading.style.display = 'block';
         translatedHeading.style.display = 'block';
-        transcript.innerHTML = request.transcript;
-        translated.innerHTML = request.translated;
+        transcriptContent.innerHTML = request.transcript;
+        translatedContent.innerHTML = request.translated;
         studyButton.style.display = 'block';
-      } else if(request.name === 'printKeywords') {
-        studyButton.style.display = 'none';
-        backButton.style.display = 'block';
-        loading.style.display = 'none';
-        transcript.style.display = 'block';
-        let cnt = 0;
-        transcript.innerHTML = "Keywords<br><br>";
-        console.log("show keywords");
-        for (var i = 0; i < request.keywordList.length; i++) {
-          if(request.keywordList[i].word != "") {
-            cnt += 1;
-            transcript.innerHTML += cnt + ". " + request.keywordList[i].word + "<br><br>";
-          }
-        }
-      }
+      } 
     });  
   });

@@ -6,31 +6,32 @@
     <link rel="stylesheet" href="login.css" type="text/css">
   </head>
   <body>
-    <div class="header">
-      <img id="logo", src="./images/logo.png"/>     
+    <div class ='wrapper'>
+      <div class="header">
+        <img id="logo", src="./images/logo.png"/>     
+      </div>
+      <ul id="loginHeading">Login
+        <li>Please sign in to continue</li>
+      </ul>
+      <ul id="signupHeading">Sign up
+        <li>Create a new account</li>
+      </ul>
+      <div class="inputContainer">
+        <input type="text" placeholder="Enter user name" id="name" name="name" required
+        minlength="4" maxlength="32">
+      <input type="password" placeholder="Enter password" id="pw" name="pw" required
+        minlength="4" maxlength="32">
+      </div>
+      <div class="buttonContainer">
+        <div class="button" id="loginBtn">Login</div>
+        <div class="button" id="signupBtn">Sign up</div>
+        <div class="button" id="cancelBtn">Cancel</div>
+      </div>
+      <div class="extra">
+        <p id="signupText">Don't have an account?</p>
+        <p id="signupLink">Sign up</p>
+      </div>
+      <p id="errorMessage"></p>
     </div>
-    <ul id="loginHeading">Login
-      <li>Please sign in to continue</li>
-    </ul>
-    <ul id="signupHeading">Sign up
-      <li>Create a new account</li>
-    </ul>
-    <div class="inputContainer">
-      <input type="text" placeholder="Enter user name" id="name" name="name" required
-      minlength="4" maxlength="32">
-    <input type="password" placeholder="Enter password" id="pw" name="pw" required
-      minlength="4" maxlength="32">
-    </div>
-    <div class="buttonContainer">
-      <div class="button" id="loginBtn">Login</div>
-      <div class="button" id="signupBtn">Sign up</div>
-      <div class="button" id="cancelBtn">Cancel</div>
-    </div>
-    <div class="extra">
-      <p id="signupText">Don't have an account?</p>
-      <p id="signupLink">Sign up</p>
-    </div>
-    <p id="errorMessage"></p>
-    <p id="gitLink">ver 1.0.0</p>
   </body>
 </html>

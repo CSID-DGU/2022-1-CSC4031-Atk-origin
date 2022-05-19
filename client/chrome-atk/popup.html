@@ -6,15 +6,28 @@
     <link rel="stylesheet" href="popup.css" type="text/css">
   </head>
   <body>
-    <div class="header">
-      <img id="logo", src="./images/logo.png"/>      
+    <div class ='wrapper'>
+      <div class="header">
+        <img id="logo", src="./images/logo.png"/>      
+      </div>
+      <ul id="heading"> </ul>
+      <div class="container" id="container">
+        <div class="subContainer">
+          <p class="label">Lectures Saved</p>
+          <p class="statistics" id="totalSaved">50</p>
+        </div>
+        <div class="subContainer">
+          <p class="label">Lectures Studied</p>
+          <p class="statistics" id="totalStudied">25</p>
+        </div>
+      </div>
+      <div class="progressBackground">
+        <div class="progressFill" id="progressBar"></div>
+      </div>
+      <div class="buttonContainer">
+        <div class="button" id="start">Start Lecture</div>
+        <div class="button" id="logout">Log out</div>
+      </div>
     </div>
-    <ul id="heading"> 
-    </ul>
-    <div class="buttonContainer">
-      <div class="button" id="start">Start Lecture</div>
-      <div class="button" id="logout">Log out</div>
-    </div>
-    <p id="gitLink">ver 1.0.0</p>
   </body>
 </html>
