@@ -3,19 +3,31 @@ document.addEventListener('DOMContentLoaded', function() {
   const heading = document.getElementById('heading');
   const startButton = document.getElementById('start');
   const logOutButton= document.getElementById('logout');
-  const gitLink = document.getElementById("gitLink");
+  const logo = document.getElementById("logo");
+  const totalSaved = document.getElementById('totalSaved');
+  const totalStudied = document.getElementById("totalStudied");
+  const progressBar = document.getElementById("progressBar");
+  const container= document.getElementById('container');
+  logo.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
+  container.onclick= () => {window.location.href="lecture.html";};
   const startProcess = function() {  
-    chrome.runtime.sendMessage("startCapture");
+    // chrome.runtime.sendMessage("startCapture");
     window.location.href="stt.html";
   }
+
+  const setPercentage = function() {
+    var perc = totalStudied.innerText / totalSaved.innerText;
+    progressBar.setAttribute("style","width:" + perc * 100 + "%");
+  }
+
   startButton.onclick = () => {startProcess();};
   logOutButton.onclick = () => {logOut()};
-  gitLink.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
-  
+
   chrome.extension.sendMessage({name: 'getLoginCookie'}, function(response) {
     heading.textContent="Hello " + response.username + "!";
   })
   displayStatus();
+  setPercentage();
 });
 
 const displayStatus = function() { //function to handle the display of time and buttons

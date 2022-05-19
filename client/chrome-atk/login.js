@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const loginButton = document.getElementById('loginBtn');
   const signupButton = document.getElementById('signupBtn');
   const cancelButton = document.getElementById('cancelBtn');
-  const gitLink = document.getElementById("gitLink");
   const signupLink = document.getElementById("signupLink");
   const loginHeading = document.getElementById("loginHeading");
   const signupHeading = document.getElementById("signupHeading");
@@ -11,11 +10,14 @@ document.addEventListener('DOMContentLoaded', function() {
   const pwInput = document.getElementById("pw");
   const signupText = document.getElementById("signupText");
   const errorMessage = document.getElementById("errorMessage");
-
-  loginButton.onclick = () => {chrome.runtime.sendMessage({type:"login", name:nameInput.value, pw:pwInput.value})};
+  const logo = document.getElementById("logo");
+  logo.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
+  
+  //loginButton.onclick = () => {chrome.runtime.sendMessage({type:"login", name:nameInput.value, pw:pwInput.value})};
+  loginButton.onclick = () => {window.location.href="popup.html"};
+  
   signupButton.onclick = () => {chrome.runtime.sendMessage({type:"join", name:nameInput.value, pw:pwInput.value})};
   cancelButton.onclick = () => {showLogin()};
-  gitLink.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
   signupLink.onclick = () => {showSignUp()};
 
   const showSignUp = function() {

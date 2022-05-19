@@ -34,7 +34,7 @@ body {
 }
 
 ul {
-  margin-top: 0px;
+  margin-top: 15px;
   margin-bottom: 0px;
   font-size: 20px;
   font-weight: bold;
@@ -44,39 +44,52 @@ ul {
   user-select: none;
 }
 
-.scrollContainer {
-  display: flex;
-  flex-wrap: wrap;
+.tableContainer {
+  display: block;
   position: absolute;
-  margin-top: 101px;
   overflow: auto;
-  top: 15px;
+  border: 2px solid rgb(94, 116, 80);
+  border-radius: 5px;
+  background-color: #F4F8F9;
+  top: 158px;
   bottom: 65px;
   left: 15px;
   right: 15px;
-  row-gap: 15px;
 }
 
-.container {
-  width: -webkit-fill-available;
-  display: flex;
-  flex-wrap: wrap;
+.fixedHeader {
+	position: sticky;
+	top: 0;
 }
 
-.heading {
-  position: absolute;
+table {
+	width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
-.scrollBox {
-  border: 2px solid rgb(94, 116, 80);
-  border-radius: 5px;
-  padding: 5px;
-  font: 14px sans-serif;
-  color:rgb(94, 116, 80);
-  background: #f4f8f9;
-  width: -webkit-fill-available;
-  overflow: auto;
-  margin-top: 42px;
+table thead tr th {
+  font-size: 14px;
+  font-weight: bold;
+  text-align: left;
+	color: #fff;
+	background: rgb(128, 234, 111);
+  border-bottom: 2px solid rgb(94, 116, 80);
+  user-select: none;
+  padding-left:15px;
+}
+
+table tbody tr td {
+	font-size: 14px;
+  color: #5E7450;
+  font-weight: bold;
+  text-align: left;
+  user-select: none;
+  padding-left:15px;
+}
+
+table tbody tr:hover {
+  background-color: #C9DDE1;
 }
 
 #loading {
