@@ -22,7 +22,6 @@
     "default_icon": "images/icon.png",
     "default_title": "ATK Speech-to-Text"
   },
-  "options_page": "options.html",
   "background": {
     "scripts": ["background.js", "worker.js"],
     "persistent": true
