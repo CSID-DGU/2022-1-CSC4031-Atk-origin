@@ -60,7 +60,7 @@ li {
   margin-bottom: 15px;
 }
 
-input{
+input[type=text]{
   display: block;
   background-color: #F4F8F9;
   height: 30px;
@@ -72,6 +72,41 @@ input{
   color: #5E7450;
   padding-left: 10px;
   padding-right: 10px;
+}
+
+input[type=password] {
+  display: block;
+  background-color: #F4F8F9;
+  height: 30px;
+  font-size: 14px;
+  font-weight: bold;
+  border: 2px solid #5E7450;
+  border-radius: 5px;
+  width: -webkit-fill-available;
+  color: #5E7450;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+input[type=radio] {
+  margin-right: 10px;
+}
+
+.container {
+  display: block;
+  gap: 15px;
+  position: relative;
+  padding-left: 24px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  width: fit-content;
+  color: #5E7450;
+  font-weight: bold;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 ::placeholder{
@@ -118,6 +153,7 @@ table thead tr th {
 table tbody tr {
   overflow: hidden;
   height: 14px; 
+  cursor: pointer;
 }
 
 table tbody tr td {
@@ -139,6 +175,8 @@ table tbody tr:hover {
   display: flex;
   margin-bottom: 15px;
   justify-content: space-around;
+  gap: 15px;
+  align-items: center;
 }
 
 .dashboardPanel {
@@ -150,8 +188,15 @@ table tbody tr:hover {
 .label {
   font-size: 14px;
   font-weight: bold;
-  margin-top: 0;
-  margin-bottom: 0;
+  margin: 0;
+  user-select: none;
+}
+
+.tag {
+  margin: 0;
+  color: #5E7450;
+  font-size: 14px;
+  font-weight: bold;
   user-select: none;
 }
 
@@ -180,6 +225,19 @@ table tbody tr:hover {
   background: #74E363;
 }
 
+.passage {
+  color: #5E7450;
+  font-size: 14px;
+  font-weight: bold;
+  max-height: 80px;
+  height: fit-content;
+  background: #F4F8F9;
+  overflow: auto;
+  border: 2px solid #5E7450;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
 
 .scrollContainer {
   display: flex;
@@ -207,12 +265,14 @@ table tbody tr:hover {
   bottom: 65px;
   left: 15px;
   right: 15px;
+  padding: 15px;
 }
 
 .flexBox {
   width: -webkit-fill-available;
   display: flex;
   flex-wrap: wrap;
+  resize: none;
 }
 
 .heading {
@@ -220,9 +280,10 @@ table tbody tr:hover {
 }
 
 .flexScrollBox {
+  resize: none;
   border: 2px solid #5E7450;
   border-radius: 5px;
-  padding: 5px;
+  padding: 15px;
   font: 14px sans-serif;
   color:#5E7450;
   background: #F4F8F9;
@@ -278,9 +339,11 @@ table tbody tr:hover {
   justify-content: space-around;
   gap: 15px;
   position: absolute;
-  bottom: 15px;
-  left: 15px;
-  right: 15px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 15px;
+  background: #fff;
 }
 
 .button {
