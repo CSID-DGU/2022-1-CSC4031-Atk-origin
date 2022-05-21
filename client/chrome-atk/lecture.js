@@ -8,11 +8,22 @@ document.addEventListener('DOMContentLoaded', function() {
     logo.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
     
     heading.style.display = 'block';
+    const urlParams = new URLSearchParams(window.location.search);
+    const page_type = urlParams.get('filter')
+
+    if(page_type==="total") {
+      heading.innerHTML = "Lectures Saved";
+    } else if(page_type==="inProgress") {
+      heading.innerHTML = "Lectures To Study";
+    } else {
+      heading.innerHTML = "Lectures Studied";
+    }
+
     container.style.display = 'block';
     backButton.style.display = 'block';
     loading.style.display = 'none';
     backButton.onclick = () => {window.location.href="popup.html"};
-    
+
     const showKeywords = function() {
       loading.style.display = 'block';
       chrome.runtime.sendMessage({name: "getKeywords"});
