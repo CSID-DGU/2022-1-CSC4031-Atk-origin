@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const tbodyRef = document.getElementById('keywordTable').getElementsByTagName('tbody')[0];
-    const backButton = document.getElementById('back');
+    const nextButton = document.getElementById('next');
     const loading = document.getElementById('loading');
     const heading = document.getElementById('heading');
     const container = document.getElementById('container');
@@ -9,9 +9,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     heading.style.display = 'block';
     container.style.display = 'block';
-    backButton.style.display = 'block';
+    nextButton.style.display = 'block';
     loading.style.display = 'none';
-    backButton.onclick = () => {window.location.href="popup.html"};
+    nextButton.onclick = () => {window.location.href="quiz.html?quizType=vocab&num=1"};
     
     const showKeywords = function() {
       loading.style.display = 'block';
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // heading.style.display = 'none';
     // container.style.display = 'none';
-    // backButton.style.display = 'none';
+    // nextButton.style.display = 'none';
     // loading.style.display = 'block';
 
     //showKeywords();
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if(request.name === 'printKeywords') {
         heading.style.display = 'block';
         container.style.display = 'block';
-        backButton.style.display = 'block';
+        nextButton.style.display = 'block';
         loading.style.display = 'none';
         let cnt = 0;
         console.log("show keywords");
