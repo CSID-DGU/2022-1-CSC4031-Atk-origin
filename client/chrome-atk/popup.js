@@ -4,19 +4,26 @@ document.addEventListener('DOMContentLoaded', function() {
   const startButton = document.getElementById('start');
   const logOutButton= document.getElementById('logout');
   const logo = document.getElementById("logo");
-  const totalSaved = document.getElementById('totalSaved');
-  const totalStudied = document.getElementById("totalStudied");
+  const total = document.getElementById('total');
+  const inProgress = document.getElementById('inProgress');
+  const completed = document.getElementById("completed");
+  const totalPanel = document.getElementById('totalPanel');
+  const inProgressPanel = document.getElementById('inProgressPanel');
+  const completedPanel = document.getElementById("completedPanel");
   const progressBar = document.getElementById("progressBar");
-  const container= document.getElementById('container');
   logo.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
-  container.onclick= () => {window.location.href="lecture.html";};
+  const param = "total";
+  totalPanel.onclick= () => {window.location.href="lecture.html?filter=total"};
+  inProgressPanel.onclick= () => {window.location.href="lecture.html?filter=inProgress"};
+  completedPanel.onclick= () => {window.location.href="lecture.html?filter=completed"};
+  
   const startProcess = function() {  
     // chrome.runtime.sendMessage("startCapture");
     window.location.href="stt.html";
   }
 
   const setPercentage = function() {
-    var perc = totalStudied.innerText / totalSaved.innerText;
+    var perc = completed.innerText / total.innerText;
     progressBar.setAttribute("style","width:" + perc * 100 + "%");
   }
 
