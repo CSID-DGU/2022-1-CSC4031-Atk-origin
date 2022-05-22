@@ -1,26 +1,37 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>ATK Speech-to-Text</title>
+    <title>ATK Kong Teacher</title>
     <script src="popup.js"></script>
-    <link rel="stylesheet" href="popup.css" type="text/css">
+    <link rel="stylesheet" href="style.css" type="text/css">
   </head>
   <body>
-    <div class="header">
-      <img id="icon" src="./images/icon.png"/> 
-      <div class="logoTitle">
-        <h1>Kong Teacher</h1>
-        <img id="logo" src="./images/bean.png"/>
-      </div>      
-    </div>
-    <ul id="userName"> 
-    </ul>
-    <div class="buttonContainer">
-      <div class="button" id="start">Start Lecture</div>
-      <div class="button" id="logout">Log out</div>
-    </div>
-    <div class="links">
-      <p id="version">ver 0.0.1</p>
+    <div class ='wrapper'>
+      <div class="header">
+        <img id="logo", src="./images/logo.png"/>      
+      </div>
+      <ul id="heading"> </ul>
+      <div class="dashboard" id="dashboard">
+        <div class="dashboardPanel" id="totalPanel">
+          <p class="label">Total Saved</p>
+          <p class="value" id="total">3</p>
+        </div>
+        <div class="dashboardPanel" id="inProgressPanel">
+          <p class="label">In Progress</p>
+          <p class="value" id="inProgress">1</p>
+        </div>
+        <div class="dashboardPanel" id="completedPanel">
+          <p class="label">Completed</p>
+          <p class="value" id="completed">2</p>
+        </div>
+      </div>
+      <div class="progressBackground">
+        <div class="progressFill" id="progressBar"></div>
+      </div>
+      <div class="buttonContainer">
+        <div class="button" id="start">Start Lecture</div>
+        <div class="button" id="logout">Log out</div>
+      </div>
     </div>
   </body>
 </html>

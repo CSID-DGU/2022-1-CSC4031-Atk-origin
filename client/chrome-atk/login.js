@@ -1,50 +1,45 @@
 //initial display for popup menu when opened
 document.addEventListener('DOMContentLoaded', function() {
-  const loginButton = document.getElementById('login');
-  const signupButton = document.getElementById('signupButton');
-  const cancelButton = document.getElementById('cancelButton');
-  const version = document.getElementById("version");
-  const signUpLink = document.getElementById("signUpLink");
-  const loginTitle = document.getElementById("title");
-  const signUpTitle = document.getElementById("signUpTitle");
+  const loginButton = document.getElementById('loginBtn');
+  const signupButton = document.getElementById('signupBtn');
+  const cancelButton = document.getElementById('cancelBtn');
+  const signupLink = document.getElementById("signupLink");
+  const loginHeading = document.getElementById("loginHeading");
+  const signupHeading = document.getElementById("signupHeading");
   const nameInput = document.getElementById("name");
   const pwInput = document.getElementById("pw");
-  const msg = document.getElementById("msg");
-  const loginFailMsg = document.getElementById("loginFailMsg");
-  const emptyMsg = document.getElementById("emptyMsg");
-
-  loginButton.onclick = () => {chrome.runtime.sendMessage({type:"login", name:nameInput.value, pw:pwInput.value})};
+  const signupText = document.getElementById("signupText");
+  const errorMessage = document.getElementById("errorMessage");
+  const logo = document.getElementById("logo");
+  logo.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
+  
+  //loginButton.onclick = () => {chrome.runtime.sendMessage({type:"login", name:nameInput.value, pw:pwInput.value})};
+  loginButton.onclick = () => {window.location.href="popup.html"};
+  
   signupButton.onclick = () => {chrome.runtime.sendMessage({type:"join", name:nameInput.value, pw:pwInput.value})};
   cancelButton.onclick = () => {showLogin()};
-  version.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
-  signUpLink.onclick = () => {showSignUp()};
+  signupLink.onclick = () => {showSignUp()};
 
   const showSignUp = function() {
-    signUpTitle.style.display="block";
+    signupHeading.style.display="block";
+    loginHeading.style.display="none";
     signupButton.style.display="block";
     cancelButton.style.display="block";
-    loginTitle.style.display="none";
     loginButton.style.display="none";
-    msg.style.display="none";
-    signUpLink.style.display="none";  
-    if(loginFailMsg.style.display==="block"){
-      loginFailMsg.style.display="none";
-    }
-    if(emptyMsg.style.display==="block"){
-      emptyMsg.style.display="none";
-    }
+    signupText.style.display="none";
+    signupLink.style.display="none";  
+    errorMessage.style.display="none";
   }
 
   const showLogin = function() {
-    signUpTitle.style.display="none";
+    signupHeading.style.display="none";
+    loginHeading.style.display="block";
     signupButton.style.display="none";
     cancelButton.style.display="none";
-    emptyMsg.style.display="none";
-    loginTitle.style.display="block";
     loginButton.style.display="block";
-    loginFailMsg.style.display="none";
-    msg.style.display="block";
-    signUpLink.style.display="block";
+    signupText.style.display="block";
+    signupLink.style.display="block";
+    errorMessage.style.display="none";
   }
 
   function setCookie(name, pwd){
@@ -61,12 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href="stt.html";
           } else {
             window.location.href="popup.html";
-            if(loginFailMsg.style.display==="block"){
-              loginFailMsg.style.display="none";
-            }
-            if(emptyMsg.style.display==="block"){
-              emptyMsg.style.display="none";
-            }
+            errorMessage.style.display="none";
           }
         })
       }
@@ -78,32 +68,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request === "loginSuccess") {
+      errorMessage.style.display="none";
       setCookie(nameInput.value, pwInput.value);
       window.location.href="popup.html";
-      if(loginFailMsg.style.display==="block"){
-        loginFailMsg.style.display="none";
-      }
-      if(emptyMsg.style.display==="block"){
-        emptyMsg.style.display="none";
-      }
-    }
-    if (request === "loginFail") {
-      loginFailMsg.style.display="block";
-      if(emptyMsg.style.display==="block"){
-        emptyMsg.style.display="none";
-      }
-    }
-    if (request === "signUpSuccess") {
+    } else if (request === "loginFail") {
+      errorMessage.innerHTML="User name or password is incorrect."
+      errorMessage.style.display="block";
+    } else if (request === "signUpSuccess") {
+      errorMessage.style.display="none";
       showLogin();
-      if(emptyMsg.style.display==="block"){
-        emptyMsg.style.display="none";
-      }
-    }
-    if (request === "stringEmpty") {
-      emptyMsg.style.display="block";
-      if(loginFailMsg.style.display==="block"){
-        loginFailMsg.style.display="none";
-      }
+    } else if (request === "signupFail") {
+      errorMessage.innerHTML="User name already exists."
+      errorMessage.style.display="block";
+    } else if (request === "stringEmpty") {
+      errorMessage.innerHTML="Required field(s) is(are) empty."
+      errorMessage.style.display="block";
     }
   });
 });

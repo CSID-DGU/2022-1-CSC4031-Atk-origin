@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ATK Kong Teacher</title>
+    <script src="quiz.js"></script>
+    <link rel="stylesheet" href="style.css" type="text/css">
+  </head>
+  <body>
+    <div class ='wrapper'>
+      <div class="header">
+        <img id="logo", src="./images/logo.png"/>     
+      </div>
+      <ul id="heading">Vocab Quiz
+        <li id="question"></li>
+      </ul>
+      <div class="passage" id="blankForm">The golfer’s swing is obviously critical
+        to the ball’s ___________. I don't understand why he doesn't just give up already. 
+        the guy is crazy, completely out of his mind. I'm way to busy to put up with him anymore. 
+        I don't understand why he doesn't just give up already. 
+        the guy is crazy, completely out of his mind. I'm way to busy to put up with him anymore. 
+      </div>
+      <div class="dashboard" id="vocabForm">
+        <p class="tag">A: </p>
+        <input type="text" name="answer" id="inputBox" required
+        minlength="4" maxlength="50">
+      </div>
+      <div id="multipleForm">
+        <label class="container">
+          <input type="radio" name="radio" value="one">
+        </label>
+        <label class="container">
+          <input type="radio" name="radio" value="two">
+        </label>
+        <label class="container">
+          <input type="radio" name="radio" value="three">
+        </label>
+        <label class="container">
+          <input type="radio" name="radio" value="four">
+        </label>
+      </div>
+      <img id="loading" src="./images/loading.gif"/> 
+      <div class="buttonContainer">
+        <div class="button" id="next">Next</div>
+        <div class="button" id="submit">Submit</div>
+      </div>
+    </div>
+  </body>
+</html>

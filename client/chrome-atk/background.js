@@ -366,8 +366,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     sendJson(url, data);
   } else if (request.type === "logOut") {
     logOut();
-  } else if (request.type === "checkUrl") {
-    //checkUrl();
   } 
 });
 
@@ -477,7 +475,7 @@ const onResponse = function(req, url) {
     if(req.status === 200) {
       chrome.runtime.sendMessage("signUpSuccess");
     } else {
-      chrome.runtime.sendMessage("signUpFail");
+      chrome.runtime.sendMessage("signupFail");
     }
   } else if(url.toLowerCase().includes("stt") === true){
     if(req.status === 200) {
@@ -497,12 +495,11 @@ const onResponse = function(req, url) {
 
 const printTranscript = function(translated) {
   chrome.storage.sync.get('subtitles', function (result) {
-    var string = "Transcript<br><br>";
+    var transcript;
     for (var i = 0; i < result.subtitles.length; i++) {
-      string += result.subtitles[i].subtitles + " ";
+      transcript += result.subtitles[i].subtitles + " ";
     }
-    string += "<br><br>Translated<br><br>" + translated;
-    chrome.runtime.sendMessage({name: "printTranslated", text: string});
+    chrome.runtime.sendMessage({name: "printTranslated", transcript: transcript, translated: translated});
   });
 }
 

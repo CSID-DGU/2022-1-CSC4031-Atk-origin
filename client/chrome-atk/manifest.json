@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
 
-  "name": "ATK Speech-to-Text",
-  "description": "This extension converts English speech to text in real-time to assist English learners",
-  "version": "0.0.1",
+  "name": "ATK Kong Teacher",
+  "description": "This extension offers real-time English STT subtitles and auto-generated questions for English learners",
+  "version": "1.0.0",
   "icons": {
     "128":"images/icon.png"
   },
@@ -22,7 +22,6 @@
     "default_icon": "images/icon.png",
     "default_title": "ATK Speech-to-Text"
   },
-  "options_page": "options.html",
   "background": {
     "scripts": ["background.js", "worker.js"],
     "persistent": true
