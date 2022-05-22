@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import site.atkproject.sttservice.domain.quiz.Quiz;
 import site.atkproject.sttservice.service.QuizService;
 import site.atkproject.sttservice.util.PythonManager;
+import site.atkproject.sttservice.web.dto.response.BasicResponseDto;
 
 import java.util.List;
 
@@ -22,8 +23,9 @@ public class QuizApiController {
     private final QuizService quizService;
 
     @GetMapping("/{lectureId}")
-    public List<Quiz> lectureKeyword(@PathVariable Long lectureId) {
+    public BasicResponseDto<List<Quiz>> lectureKeyword(@PathVariable Long lectureId) {
         log.info("QUIZController {}", lectureId);
-        return quizService.getQuizList(lectureId);
+        List<Quiz> quizList = quizService.getQuizList(lectureId);
+        return new BasicResponseDto<>(BasicResponseDto.SUCCESS, BasicResponseDto.QUIZ, quizList);
     }
 }
