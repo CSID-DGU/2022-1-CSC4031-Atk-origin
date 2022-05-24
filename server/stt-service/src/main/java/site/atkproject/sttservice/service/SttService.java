@@ -12,7 +12,7 @@ import site.atkproject.sttservice.domain.lecture.Lecture;
 import site.atkproject.sttservice.domain.lecture.LectureRepository;
 import site.atkproject.sttservice.domain.user.User;
 import site.atkproject.sttservice.domain.user.UserRepository;
-import site.atkproject.sttservice.util.PythonSTT;
+import site.atkproject.sttservice.util.stt.SttManager;
 import site.atkproject.sttservice.web.dto.request.SttStartRequestDto;
 
 import java.io.*;
@@ -26,7 +26,7 @@ public class SttService {
 
     private final LectureRepository lectureRepository;
     private final UserRepository userRepository;
-    PythonSTT pythonSTT = new PythonSTT();
+    private final SttManager sttManager;
 
     @Value("${file.dir}")
     private String homeDir;
@@ -56,7 +56,7 @@ public class SttService {
         lecture = optional.get();
         saveFile(file, fullPath);
         String fileName = getUsername() + "/" + file.getOriginalFilename();
-        String sttedContent = pythonSTT.getSTT(fileName);
+        String sttedContent = sttManager.getSTT(fileName);
         lecture.updateContent(sttedContent);
         boolean isDeleted = deleteFile(fullPath);
         return sttedContent;
@@ -74,7 +74,7 @@ public class SttService {
     private String getFullPath(MultipartFile file) {
         String username = getUsername();
 
-        String finalPath = homeDir + "app/stt/" + username;
+        String finalPath = homeDir + "app/stt/files/" + username;
         File folder = new File(finalPath);
         if (!folder.exists()) {
             try {

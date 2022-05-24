@@ -12,7 +12,7 @@ import site.atkproject.sttservice.domain.quiz.Quiz;
 import site.atkproject.sttservice.domain.quiz.QuizRepository;
 import site.atkproject.sttservice.domain.user.User;
 import site.atkproject.sttservice.domain.user.UserRepository;
-import site.atkproject.sttservice.service.keyword.Keyword;
+import site.atkproject.sttservice.util.keyword.Keyword;
 import site.atkproject.sttservice.service.translate.Translation;
 import site.atkproject.sttservice.web.dto.response.*;
 

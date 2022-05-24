@@ -3,17 +3,16 @@ package site.atkproject.sttservice.util;
 import lombok.NoArgsConstructor;
 
 import java.io.*;
-import java.util.concurrent.TimeUnit;
 
 @NoArgsConstructor
-public abstract class PythonManager {
+public abstract class PythonFileManager {
 
     protected String homePath = System.getProperty("user.home");
     protected String pythonPath;
     protected String finalPath;
     protected String appPath;
 
-    public PythonManager(PythonFileName pythonFileName, String appPath) {
+    public PythonFileManager(PythonFileName pythonFileName, String appPath) {
         this.pythonPath = pythonFileName.getPath();
         this.appPath = appPath;
         this.finalPath = homePath + pythonPath;
@@ -35,7 +34,7 @@ public abstract class PythonManager {
 //            boolean exitCode = process.waitFor(20, TimeUnit.SECONDS);
             int exitCode = process.waitFor();
             if (exitCode != 0) {
-                throw new IllegalArgumentException("북마크 생성 도중 오류가 발생했습니다.");
+                throw new IllegalArgumentException("키워드 생성 도중 오류가 발생했습니다.");
             }
 
             return result;

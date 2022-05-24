@@ -2,13 +2,11 @@ package site.atkproject.sttservice.web.api;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import site.atkproject.sttservice.domain.lecture.Lecture;
 import site.atkproject.sttservice.service.SttService;
-import site.atkproject.sttservice.util.SocketTest;
+import site.atkproject.sttservice.util.FastApi;
 import site.atkproject.sttservice.web.dto.request.SttStartRequestDto;
 import site.atkproject.sttservice.web.dto.response.BasicResponseDto;
 import site.atkproject.sttservice.web.dto.response.SttResultResponseDto;
@@ -23,7 +21,7 @@ import java.io.IOException;
 public class SttApiController {
 
     private final SttService sttService;
-    private final SocketTest socketTest;
+    private final FastApi socketTest;
 
     @PostMapping("")
     public BasicResponseDto<SttStartResponseDto> startStt(@RequestBody SttStartRequestDto sttStartRequestDto) {
