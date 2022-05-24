@@ -40,7 +40,7 @@ services:
       - ~/data/mysql-db:/var/lib/mysql
   
   spring:
-    image: hsj4665/atk-spring:0.2
+    image: hsj4665/atk-spring:0.4
     container_name: atk-spring
     ports:
       - 8080:8080
@@ -50,3 +50,13 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mariadb://database:3306/atk?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: atk123!
+    volumes:
+      - ~/app/stt/files:/root/app/stt/files
+  
+  fastapi:
+    image: hsj4665/atk-fastapi:0.2
+    container_name: atk-fastapi
+    ports:
+      - 8000:8000
+    volumes:
+      - ~/app/stt/files:/api/files
