@@ -1,6 +1,5 @@
 package site.atkproject.sttservice.web.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import site.atkproject.sttservice.domain.quiz.Quiz;
 import site.atkproject.sttservice.service.QuizService;
-import site.atkproject.sttservice.util.PythonManager;
 import site.atkproject.sttservice.web.dto.response.BasicResponseDto;
 
 import java.util.List;

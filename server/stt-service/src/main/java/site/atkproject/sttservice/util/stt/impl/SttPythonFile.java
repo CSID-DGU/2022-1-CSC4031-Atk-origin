@@ -1,8 +1,12 @@
-package site.atkproject.sttservice.util;
+package site.atkproject.sttservice.util.stt.impl;
 
-public class PythonSTT extends PythonManager {
+import site.atkproject.sttservice.util.PythonFileManager;
+import site.atkproject.sttservice.util.PythonFileName;
+import site.atkproject.sttservice.util.stt.SttManager;
 
-    public PythonSTT() {
+public class SttPythonFile extends PythonFileManager implements SttManager {
+
+    public SttPythonFile() {
         super(PythonFileName.STT, "/app/stt");
     }
 
@@ -16,7 +20,7 @@ public class PythonSTT extends PythonManager {
     }
 
     public static void main(String[] args) {
-        PythonSTT pythonSTT = new PythonSTT();
+        SttPythonFile pythonSTT = new SttPythonFile();
         long start = System.currentTimeMillis();
         pythonSTT.getSTT("seokju/testaudio.wav");
         System.out.println((System.currentTimeMillis() - start)/1000);
