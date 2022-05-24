@@ -1,8 +1,8 @@
 let interval;
 let auth; 
-let serverUrl = "http://ec2-3-39-9-10.ap-northeast-2.compute.amazonaws.com/";
+//let serverUrl = "http://ec2-3-39-9-10.ap-northeast-2.compute.amazonaws.com/";
+let serverUrl = "http://localhost:8080/";
 let inProgress = false;
-let lectureId;
 
 chrome.browserAction.onClicked.addListener(function(tab){
   chrome.tabs.sendMessage(tab.id,"toggle");
@@ -245,6 +245,8 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
     const cancelCapture = function() {
       let endTabId;
       clearInterval(interval);
+      var url = "api/lecture";
+      getJson(url);
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
         endTabId = tabs[0].id;
         if(mediaRecorder && startTabId === endTabId){
@@ -387,11 +389,26 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
       sendResponse({subtitles: result.subtitles});
     });
   } else if(request.name === 'getTranscript') {
-    var url = "api/lecture/" + lectureId + "/translate";
+    var url = "api/lecture/" + request.lectureId + "/translate";
     getJson(url);
+    var transcriptUrl = "api/lecture/" + request.lectureId;
+    getJson(transcriptUrl);
   } else if(request.name === 'getKeywords') {
-    var url = "api/lecture/" + lectureId + "/keyword";
+    var url = "api/lecture/" + request.lectureId + "/keyword";
     getJson(url);
+  } else if(request.name === 'getList') {
+    chrome.storage.sync.get('lectures', function (result) {
+      if(result.lectures.length <= 0) {
+        var url = "api/lecture";
+        getJson(url);
+      } else {
+        chrome.runtime.sendMessage({name:"printLectureList", lectureList: result }); 
+        console.log(result);
+      }
+    });
+  } else if(request.name === 'deleteLecture') {
+    var url = "api/lecture/" + request.lectureId;
+    deleteLecture(url);
   }
   return true;
 });
@@ -401,20 +418,23 @@ function postAudio(blob){
   const baseUrl = serverUrl;
   var formData = new FormData();
   formData.append("file", blob, fileName);
-  const reqUrl = baseUrl + "api/stt/" + lectureId;
-  var request = new XMLHttpRequest();
-  request.open("POST", reqUrl, true);
-  request.setRequestHeader("Authorization", auth);
-  request.onreadystatechange = function() { 
-    if (this.readyState === XMLHttpRequest.DONE ) {
-      if(this.status === 200) {
-        const obj = JSON.parse(this.responseText);
-        processSubtitles(obj.text);
-        console.log(obj.text);
-      } 
+  chrome.storage.sync.get('lectureId', function (result) {
+    const reqUrl = baseUrl + "api/stt/" + result.lectureId;
+    var request = new XMLHttpRequest();
+    request.open("POST", reqUrl, true);
+    request.setRequestHeader("Authorization", auth);
+    request.onreadystatechange = function() { 
+      if (this.readyState === XMLHttpRequest.DONE ) {
+        if(this.status === 200) {
+          const obj = JSON.parse(this.responseText);
+          processSubtitles(obj.extraResult.text);
+          console.log("[LOG] received subtitle: " + obj.extraResult.text);
+        } 
+      }
     }
-  }
-  request.send(formData);
+    request.send(formData);
+  });
+
 }
 
 const processSubtitles = function(data) {
@@ -427,7 +447,29 @@ const processSubtitles = function(data) {
         chrome.runtime.sendMessage({name:"subtitle", text:result.subtitles }); 
       });
     });
-});
+  });
+}
+
+const deleteLecture = function(url) {
+  console.log("[LOG] sending request to " + url);
+  const req = new XMLHttpRequest();
+  const reqUrl = serverUrl + url;
+  req.open("DELETE", reqUrl, true);
+  req.setRequestHeader("Authorization", auth);
+  req.setRequestHeader("Content-type", "application/json;charset=utf-8");
+  req.send();
+  req.onreadystatechange = function() { 
+    if (this.readyState === XMLHttpRequest.DONE ) {
+      console.log("[LOG] received response from " + url + ": " + this.responseText);
+      if (this.status === 200) {
+        console.log('success');
+        var emptyArr = [];
+        chrome.storage.sync.set({lectures: emptyArr}, function () {
+          chrome.runtime.sendMessage("deleteSuccess"); 
+        });
+      }
+    }
+  }
 }
 
 const sendJson = function(url, data) {
@@ -480,31 +522,44 @@ const onResponse = function(req, url) {
   } else if(url.toLowerCase().includes("stt") === true){
     if(req.status === 200) {
       const obj = JSON.parse(req.responseText);
-      console.log(obj.id);
-      lectureId = obj.id;
+      console.log("[LOG] lecture id is " + obj.extraResult.id);
+      chrome.storage.sync.set({lectureId: obj.extraResult.id});
       startCapture();
     }
   } else if(url.toLowerCase().includes("translate") === true){
     const obj = JSON.parse(req.responseText);
-    printTranscript(obj.translatedText);
+    printTranslated(obj.extraResult.translatedText);
   } else if(url.toLowerCase().includes("keyword") === true) {
     const obj = JSON.parse(req.responseText);
-    printKeywords(obj.keywordList);
+    printKeywords(obj.extraResult.keywordList);
+  } else if(url.toLowerCase().includes("lecture/") === true) {
+    const obj = JSON.parse(req.responseText);
+    printTranscript(obj.extraResult.content);
+  } else if(url.toLowerCase().includes("lecture") === true) {
+    const obj = JSON.parse(req.responseText);
+    printList(obj.extraResult);
   }
 }
 
-const printTranscript = function(translated) {
-  chrome.storage.sync.get('subtitles', function (result) {
-    var transcript;
-    for (var i = 0; i < result.subtitles.length; i++) {
-      transcript += result.subtitles[i].subtitles + " ";
-    }
-    chrome.runtime.sendMessage({name: "printTranslated", transcript: transcript, translated: translated});
-  });
+const printTranscript = function(data) {
+  chrome.runtime.sendMessage({name: "printTranscript", transcript: data});
+}
+
+const printTranslated = function(data) {
+  chrome.runtime.sendMessage({name: "printTranslated", translated: data});
 }
 
 const printKeywords = function(list) {
   chrome.runtime.sendMessage({name: "printKeywords", keywordList: list});
+}
+
+const printList = function(data) {
+  chrome.storage.sync.set({lectures: data}, function () {
+    chrome.storage.sync.get('lectures', function (result) {
+      console.log(result);
+      chrome.runtime.sendMessage({name:"printLectureList", lectureList: result }); 
+    });
+  });
 }
 
 const logOut = function() {
@@ -514,6 +569,10 @@ const logOut = function() {
   var subtitlesArr = [];
   chrome.storage.sync.set({subtitles: subtitlesArr}, function () {
     console.log("subtitles reinitialized");
+  });
+  var lecturesArr = [];
+  chrome.storage.sync.set({lectures: lecturesArr}, function () {
+    console.log("lectures reinitialized");
   });
 }
 
