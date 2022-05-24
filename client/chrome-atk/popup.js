@@ -11,14 +11,25 @@ document.addEventListener('DOMContentLoaded', function() {
   const inProgressPanel = document.getElementById('inProgressPanel');
   const completedPanel = document.getElementById("completedPanel");
   const progressBar = document.getElementById("progressBar");
+
+  const loading = document.getElementById("loading");
+
   logo.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
   const param = "total";
+
   totalPanel.onclick= () => {window.location.href="lecture.html?filter=total"};
   inProgressPanel.onclick= () => {window.location.href="lecture.html?filter=inProgress"};
   completedPanel.onclick= () => {window.location.href="lecture.html?filter=completed"};
   
+  const showList = function() {
+    loading.style.display = 'block';
+    chrome.runtime.sendMessage({name: "getList"});
+  }
+
+  showList();
+
   const startProcess = function() {  
-    // chrome.runtime.sendMessage("startCapture");
+    chrome.runtime.sendMessage("startCapture");
     window.location.href="stt.html";
   }
 
@@ -35,6 +46,14 @@ document.addEventListener('DOMContentLoaded', function() {
   })
   displayStatus();
   setPercentage();
+
+  chrome.runtime.onMessage.addListener((request, sender) => {
+    if(request.name === 'printLectureList') {
+      loading.style.display = 'none';
+      total.innerHTML = request.lectureList.lectures.length;
+      setPercentage();
+    } 
+  });
 });
 
 const displayStatus = function() { //function to handle the display of time and buttons

@@ -7,15 +7,18 @@ document.addEventListener('DOMContentLoaded', function() {
   finishButton.onclick = () => {stopProcess()};
   subtitleBox.innerHTML = "";
 
-  const showDemo = function() {
-    for(var i=0; i<100; i++) {
-      subtitleBox.innerHTML += "This is an example. Please do not read into it too much. It's 7 pm right now and I'm tired.<br><br>";
-    }
-  } 
-  showDemo();
+  // const showDemo = function() {
+  //   for(var i=0; i<100; i++) {
+  //     subtitleBox.innerHTML += "This is an example. Please do not read into it too much. It's 7 pm right now and I'm tired.<br><br>";
+  //   }
+  // } 
+  // showDemo();
+  
   const stopProcess = function() {  
-    // chrome.runtime.sendMessage("cancelCapture");
-    window.location.href="transcript.html"
+    chrome.runtime.sendMessage("cancelCapture");
+    chrome.storage.sync.get('lectureId', function (result) {
+      window.location.href="transcript.html?lectureId="+result.lectureId;
+    });
   }
 
   const setSubtitles = function(subtitles) {
@@ -29,9 +32,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // chrome.extension.sendMessage({name: 'getSubtitles'}, function(response) {
-  //   setSubtitles(response.subtitles);
-  // })
+  chrome.extension.sendMessage({name: 'getSubtitles'}, function(response) {
+    setSubtitles(response.subtitles);
+  })
 
   chrome.runtime.onMessage.addListener((request, sender) => {
     if(request.name === 'subtitle') {

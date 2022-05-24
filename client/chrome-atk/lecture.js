@@ -24,49 +24,43 @@ document.addEventListener('DOMContentLoaded', function() {
   loading.style.display = 'none';
   backButton.onclick = () => {window.location.href="popup.html"};
 
-  const showKeywords = function() {
-    loading.style.display = 'block';
-    chrome.runtime.sendMessage({name: "getKeywords"});
+  const showTranscript = function(idx) {
+    chrome.storage.sync.get('lectures', function (result) {
+      var sId = result.lectures[idx-1].id;
+      window.location.href="transcript.html?lectureId="+sId;
+    });
   }
 
-  const generateDemo = function(filter) {
-    const arrList = ["The end of Roe v. Wade", "An Olympic Champion's Mindset for Overcoming Fear", "The Real Reason You Feel So Busy"];  
-    const scoreList = [4, 5, 0];  
-    
-    for (var i = 0; i < arrList.length; i++) {
-      if(page_type==="inProgress") {
-        if(scoreList[i] > 0) {
-          continue;
-        }
-      } else if (page_type === "completed") {
-        if(scoreList[i] <= 0) {
-          continue;
-        }
-      }
-      var newRow = tbodyRef.insertRow();
-      newRow.onclick = () => {window.location.href="transcript.html"};
-      var newCell = newRow.insertCell();
-      var date = document.createTextNode(new Date().toLocaleDateString());
-      newCell.appendChild(date);
+  const printList = function() {
+    chrome.storage.sync.get('lectures', function (result) {
+      for (var i = 0; i < result.lectures.length; i++) {
+        var newRow = tbodyRef.insertRow();
+        var newCell = newRow.insertCell();
+        var date = document.createTextNode(new Date(result.lectures[i].studyDate).toLocaleDateString());
+        newCell.appendChild(date);
+  
+        var wordCell = newRow.insertCell();
+        var wordText = document.createTextNode(result.lectures[i].title);
+        wordCell.appendChild(wordText);
+        
+        var meaningCell = newRow.insertCell();
+        var meaningText = document.createTextNode(0);
+        meaningCell.appendChild(meaningText);
 
-      var wordCell = newRow.insertCell();
-      var wordText = document.createTextNode(arrList[i]);
-      wordCell.appendChild(wordText);
-      
-      var meaningCell = newRow.insertCell();
-      var meaningText = document.createTextNode(scoreList[i]);
-      meaningCell.appendChild(meaningText);
-    }
-  };
+        newRow.onclick = function(evt) {
+          console.log(this.rowIndex);
+          showTranscript(this.rowIndex);
+        };
+      }
+    });
+  }
 
   // heading.style.display = 'none';
   // container.style.display = 'none';
   // backButton.style.display = 'none';
   // loading.style.display = 'block';
 
-  //showKeywords();
-
-  generateDemo(page_type);
+  printList();
 
   chrome.runtime.onMessage.addListener((request, sender) => {
     if(request.name === 'printKeywords') {
@@ -95,5 +89,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
     }
-  });  
+  });     
 });

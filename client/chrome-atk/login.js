@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const logo = document.getElementById("logo");
   logo.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
   
-  //loginButton.onclick = () => {chrome.runtime.sendMessage({type:"login", name:nameInput.value, pw:pwInput.value})};
-  loginButton.onclick = () => {window.location.href="popup.html"};
+  loginButton.onclick = () => {chrome.runtime.sendMessage({type:"login", name:nameInput.value, pw:pwInput.value})};
+  //loginButton.onclick = () => {window.location.href="popup.html"};
   
   signupButton.onclick = () => {chrome.runtime.sendMessage({type:"join", name:nameInput.value, pw:pwInput.value})};
   cancelButton.onclick = () => {showLogin()};

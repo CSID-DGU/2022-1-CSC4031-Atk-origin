@@ -7,24 +7,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const logo = document.getElementById("logo");
     logo.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
     
-    heading.style.display = 'block';
-    container.style.display = 'block';
-    nextButton.style.display = 'block';
-    loading.style.display = 'none';
+    // heading.style.display = 'block';
+    // container.style.display = 'block';
+    // nextButton.style.display = 'block';
+    // loading.style.display = 'none';
     nextButton.onclick = () => {window.location.href="quiz.html?quizType=vocab&num=1"};
     
-    const showKeywords = function() {
-      loading.style.display = 'block';
-      chrome.runtime.sendMessage({name: "getKeywords"});
-    }
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('lectureId')
+    
+    chrome.runtime.sendMessage({name: "getKeywords", lectureId: id});
 
-    // heading.style.display = 'none';
-    // container.style.display = 'none';
-    // nextButton.style.display = 'none';
-    // loading.style.display = 'block';
-
-    //showKeywords();
-
+    heading.style.display = 'none';
+    container.style.display = 'none';
+    nextButton.style.display = 'none';
+    loading.style.display = 'block';
+    
     chrome.runtime.onMessage.addListener((request, sender) => {
       if(request.name === 'printKeywords') {
         heading.style.display = 'block';
