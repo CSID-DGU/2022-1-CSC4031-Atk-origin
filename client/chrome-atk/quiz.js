@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const idx = parseInt(num);
 
     // test code(delete later)
-    const quizArr = ["vocab","vocab","vocab", "vocab", "multiple", "multiple", "multiple", "blank","blank","blank"];
+    const quizArr = ["vocab","vocab","vocab", "multiple", "multiple", "multiple", "blank", "blank","blank","blank"];
     const multipleArr = ["trajectory", "glide","departure","air journey"];
 
     if(idx >= quizArr.length) {

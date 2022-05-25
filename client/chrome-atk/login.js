@@ -51,14 +51,9 @@ document.addEventListener('DOMContentLoaded', function() {
   function getCookie(){
     chrome.extension.sendMessage({name: 'getLoginCookie'}, function(response) {
       if(response.username){
-        chrome.extension.sendMessage({name: 'getStatus'}, function(response) {
-          if(response.status === true) {
-            window.location.href="stt.html";
-          } else {
-            window.location.href="popup.html";
-            errorMessage.style.display="none";
-          }
-        })
+        chrome.runtime.sendMessage({type:"login", name:response.username, pw:response.password});
+        //window.location.href="popup.html";
+        errorMessage.style.display="none";
       }
     })
   }
@@ -69,7 +64,6 @@ document.addEventListener('DOMContentLoaded', function() {
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request === "loginSuccess") {
       errorMessage.style.display="none";
-      setCookie(nameInput.value, pwInput.value);
       window.location.href="popup.html";
     } else if (request === "loginFail") {
       errorMessage.innerHTML="User name or password is incorrect."

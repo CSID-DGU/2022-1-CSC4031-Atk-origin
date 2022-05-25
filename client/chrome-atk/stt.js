@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // showDemo();
   
   const stopProcess = function() {  
+    var emptyArr = [];
+    chrome.storage.sync.set({lectures: emptyArr});
     chrome.runtime.sendMessage("cancelCapture");
     chrome.storage.sync.get('lectureId', function (result) {
       window.location.href="transcript.html?lectureId="+result.lectureId;
