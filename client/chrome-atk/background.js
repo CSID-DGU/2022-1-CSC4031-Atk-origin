@@ -1,12 +1,25 @@
 let interval;
-let auth; 
 //let serverUrl = "http://ec2-3-39-9-10.ap-northeast-2.compute.amazonaws.com/";
 let serverUrl = "http://localhost:8080/";
 let inProgress = false;
 
-chrome.browserAction.onClicked.addListener(function(tab){
-  chrome.tabs.sendMessage(tab.id,"toggle");
-  checkUrl();
+chrome.browserAction.onClicked.addListener(function(tab) {
+  var found = false;
+  var tabId;
+  chrome.tabs.query({}, function (tabs) {
+    for (var i = 0; i < tabs.length; i++) {
+      if (tabs[i].url.search("www.ted.com") > -1){
+        found = true;
+        tabId = tabs[i].id;
+      }
+    }
+    if (found == false) {
+      chrome.tabs.create({url: "https://ted.com"});
+    } else {
+      chrome.tabs.update(tabId, {selected: true});
+    }
+    chrome.tabs.sendMessage(tab.id,"toggle");
+  });
 });
 
 const extend = function() { //helper function to merge objects
@@ -233,20 +246,32 @@ const audioCapture = (timeLimit, muteTab, format, quality, limitRemoved) => {
 
     const stopCapture = function() {
       let endTabId;
-
       console.log("[LOG] stopping current capture");
       //check to make sure the current tab is the tab being captured
       clearInterval(interval);
       mediaRecorder.finishRecording();  
       closeStream(startTabId);
-      restartCapture(startTabId);
+      chrome.tabs.update(startTabId, {selected: true});
+      chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
+        var found = false;
+        for (var i = 0; i < tabs.length; i++) {
+          if (tabs[i].url.search("www.ted.com") > -1){
+            console.log('found');
+            found = true;
+          }
+        }
+        if(found === true){
+          restartCapture(startTabId);
+        } else {
+          console.log('not found');
+          return;
+        }
+      });
     }
 
     const cancelCapture = function() {
       let endTabId;
       clearInterval(interval);
-      var url = "api/lecture";
-      getJson(url);
       chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
         endTabId = tabs[0].id;
         if(mediaRecorder && startTabId === endTabId){
@@ -365,22 +390,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     const url = "api/user/" + request.type;
     var data = JSON.stringify({username: request.name, password: request.pw});
-    sendJson(url, data);
+    loginReq(url, data);
   } else if (request.type === "logOut") {
     logOut();
   } 
 });
 
 chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
-  if (request.name == 'setLoginCookie') {
-    var obj = {username:request.username, password:request.password, authorization:auth}    
-    chrome.storage.sync.set(obj, function() {
-    });           
-  } else if (request.name == 'getLoginCookie') {
+  if (request.name == 'getLoginCookie') {
     chrome.storage.sync.get(function(data) {
       sendResponse({ username: data.username, password: data.password, authorization: data.authorization });
       console.log("Login Cookie loaded - username: " + data.username + " password: "+ data.password + " authorization: " + data.authorization);
-    })       
+    });
   } else if(request.name === 'getStatus') {
     sendResponse({status: inProgress});
   } else if(request.name === 'getSubtitles') {
@@ -422,19 +443,20 @@ function postAudio(blob){
     const reqUrl = baseUrl + "api/stt/" + result.lectureId;
     var request = new XMLHttpRequest();
     request.open("POST", reqUrl, true);
-    request.setRequestHeader("Authorization", auth);
-    request.onreadystatechange = function() { 
-      if (this.readyState === XMLHttpRequest.DONE ) {
-        if(this.status === 200) {
-          const obj = JSON.parse(this.responseText);
-          processSubtitles(obj.extraResult.text);
-          console.log("[LOG] received subtitle: " + obj.extraResult.text);
-        } 
+    chrome.storage.sync.get(function(data) {
+      request.setRequestHeader("Authorization", data.authorization);
+      request.onreadystatechange = function() { 
+        if (this.readyState === XMLHttpRequest.DONE ) {
+          if(this.status === 200) {
+            const obj = JSON.parse(this.responseText);
+            processSubtitles(obj.extraResult.text);
+            console.log("[LOG] received subtitle: " + obj.extraResult.text);
+          } 
+        }
       }
-    }
-    request.send(formData);
+      request.send(formData);
+    });
   });
-
 }
 
 const processSubtitles = function(data) {
@@ -455,21 +477,23 @@ const deleteLecture = function(url) {
   const req = new XMLHttpRequest();
   const reqUrl = serverUrl + url;
   req.open("DELETE", reqUrl, true);
-  req.setRequestHeader("Authorization", auth);
-  req.setRequestHeader("Content-type", "application/json;charset=utf-8");
-  req.send();
-  req.onreadystatechange = function() { 
-    if (this.readyState === XMLHttpRequest.DONE ) {
-      console.log("[LOG] received response from " + url + ": " + this.responseText);
-      if (this.status === 200) {
-        console.log('success');
-        var emptyArr = [];
-        chrome.storage.sync.set({lectures: emptyArr}, function () {
-          chrome.runtime.sendMessage("deleteSuccess"); 
-        });
+  chrome.storage.sync.get(function(data) {
+    req.setRequestHeader("Authorization", data.authorization);
+    req.setRequestHeader("Content-type", "application/json;charset=utf-8");
+    req.send();
+    req.onreadystatechange = function() { 
+      if (this.readyState === XMLHttpRequest.DONE ) {
+        console.log("[LOG] received response from " + url + ": " + this.responseText);
+        if (this.status === 200) {
+          console.log('success');
+          var emptyArr = [];
+          chrome.storage.sync.set({lectures: emptyArr}, function () {
+            chrome.runtime.sendMessage("deleteSuccess"); 
+          });
+        }
       }
     }
-  }
+  });
 }
 
 const sendJson = function(url, data) {
@@ -477,15 +501,45 @@ const sendJson = function(url, data) {
   const req = new XMLHttpRequest();
   const reqUrl = serverUrl + url;
   req.open("POST", reqUrl, true);
-  if(url.toLowerCase().includes("stt")){
-    req.setRequestHeader("Authorization", auth);
-  }
+  chrome.storage.sync.get(function(info) {
+    req.setRequestHeader("Authorization", info.authorization);
+    req.setRequestHeader("Content-type", "application/json;charset=utf-8");
+    req.send(data);
+    req.onreadystatechange = function() { 
+      if (this.readyState === XMLHttpRequest.DONE ) {
+        console.log("[LOG] received response from " + url + ": " + this.responseText);
+        onResponse(this, url);
+      }
+    }
+  });
+}
+
+const loginReq = function(url, data) {
+  console.log("[LOG] sending request to " + url);
+  const req = new XMLHttpRequest();
+  const reqUrl = serverUrl + url;
+  req.open("POST", reqUrl, true);
   req.setRequestHeader("Content-type", "application/json;charset=utf-8");
   req.send(data);
   req.onreadystatechange = function() { 
     if (this.readyState === XMLHttpRequest.DONE ) {
       console.log("[LOG] received response from " + url + ": " + this.responseText);
-      onResponse(this, url);
+      if(url.toLowerCase().includes("login") === true){
+        if(req.status === 200) {
+          var json = JSON.parse(data);
+          var obj = {username:json.username, password:json.password, authorization:req.getResponseHeader("Authorization")};    
+          chrome.storage.sync.set(obj, function() {});    
+          chrome.runtime.sendMessage("loginSuccess");  
+        } else {
+          chrome.runtime.sendMessage("loginFail");
+        }
+      } else if(url.toLowerCase().includes("join") === true){
+        if(req.status === 200) {
+          chrome.runtime.sendMessage("signUpSuccess");
+        } else {
+          chrome.runtime.sendMessage("signupFail");
+        }
+      } 
     }
   }
 }
@@ -495,31 +549,20 @@ const getJson = function(url) {
   const req = new XMLHttpRequest();
   const reqUrl = serverUrl + url;
   req.open("GET", reqUrl, true);
-  req.setRequestHeader("Authorization", auth);
-  req.send();
-  req.onreadystatechange = function() { 
-    if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-      console.log("[LOG] received response from " + url + ": " + this.responseText);
-      onResponse(this, url);
+  chrome.storage.sync.get(function(data) {
+    req.setRequestHeader("Authorization", data.authorization);
+    req.send();
+    req.onreadystatechange = function() { 
+      if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+        console.log("[LOG] received response from " + url + ": " + this.responseText);
+        onResponse(this, url);
+      }
     }
-  }
-}
+  });
+};
 
 const onResponse = function(req, url) {
-  if(url.toLowerCase().includes("login") === true){
-    if(req.status === 200) {
-      auth = req.getResponseHeader("Authorization");
-      chrome.runtime.sendMessage("loginSuccess"); 
-    } else {
-      chrome.runtime.sendMessage("loginFail"); 
-    }
-  } else if(url.toLowerCase().includes("join") === true){
-    if(req.status === 200) {
-      chrome.runtime.sendMessage("signUpSuccess");
-    } else {
-      chrome.runtime.sendMessage("signupFail");
-    }
-  } else if(url.toLowerCase().includes("stt") === true){
+  if(url.toLowerCase().includes("stt") === true){
     if(req.status === 200) {
       const obj = JSON.parse(req.responseText);
       console.log("[LOG] lecture id is " + obj.extraResult.id);
