@@ -229,7 +229,7 @@ table tbody tr:hover {
 .progressFill {
   height: 24px;
   border-radius: 12px;
-  width: 20%;
+  width: 0%;
   background: #74E363;
 }
 
