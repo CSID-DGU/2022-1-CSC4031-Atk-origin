@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const inProgressPanel = document.getElementById('inProgressPanel');
   const completedPanel = document.getElementById("completedPanel");
   const progressBar = document.getElementById("progressBar");
+  const dashboard = document.getElementById("dashboard");
+  const progressContainer = document.getElementById("progressContainer");
 
   const loading = document.getElementById("loading");
 
@@ -23,6 +25,10 @@ document.addEventListener('DOMContentLoaded', function() {
   
   const showList = function() {
     loading.style.display = 'block';
+    dashboard.style.display = 'none';
+    progressContainer.style.display = 'none';
+    startButton.style.display = 'none';
+    logOutButton.style.display = 'none';
     chrome.runtime.sendMessage({name: "getList"});
   }
 
@@ -50,6 +56,10 @@ document.addEventListener('DOMContentLoaded', function() {
   chrome.runtime.onMessage.addListener((request, sender) => {
     if(request.name === 'printLectureList') {
       loading.style.display = 'none';
+      dashboard.style.display = 'flex';
+      progressContainer.style.display = 'block';
+      startButton.style.display = 'block';
+      logOutButton.style.display = 'block';
       total.innerHTML = request.lectureList.lectures.length;
       setPercentage();
     } 

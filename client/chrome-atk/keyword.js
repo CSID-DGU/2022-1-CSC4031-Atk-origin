@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let cnt = 0;
         console.log("show keywords");
         for (var i = 0; i < request.keywordList.length; i++) {
-          if(request.keywordList[i].word != "") {
+          if(request.keywordList[i].word.trim()) {
             cnt += 1;
             var newRow = tbodyRef.insertRow();
 
@@ -47,6 +47,11 @@ document.addEventListener('DOMContentLoaded', function() {
             var meaningCell = newRow.insertCell();
             var meaningText = document.createTextNode('없음');
             meaningCell.appendChild(meaningText);
+
+            newRow.onclick = function(evt) {
+              var cells = this.getElementsByTagName('td');
+              window.location.href="dictionary.html?lectureId="+id+"&word="+ cells[1].innerHTML;
+            };
           }
         }
       }

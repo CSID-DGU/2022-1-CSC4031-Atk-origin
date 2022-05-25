@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     logo.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
     nextButton.onclick = () => {nextQuestion()};
-    submitButton.onclick = () => {window.location.href="popup.html"};
+    submitButton.onclick = () => {window.location.href="result.html"};
 
     if(quizType==="vocab") {
         vocabForm.style.display="flex";
