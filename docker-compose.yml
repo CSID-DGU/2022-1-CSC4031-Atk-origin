@@ -40,7 +40,7 @@ services:
       - ~/data/mysql-db:/var/lib/mysql
   
   spring:
-    image: hsj4665/atk-spring:0.4
+    image: hsj4665/atk-spring:0.6
     container_name: atk-spring
     ports:
       - 8080:8080
@@ -54,7 +54,7 @@ services:
       - ~/app/stt/files:/root/app/stt/files
   
   fastapi:
-    image: hsj4665/atk-fast-mac:0.1
+    image: hsj4665/atk-fastapi:0.3
     container_name: atk-fastapi
     ports:
       - 8000:8000
