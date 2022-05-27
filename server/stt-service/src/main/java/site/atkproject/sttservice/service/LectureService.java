@@ -27,6 +27,7 @@ import java.util.Optional;
 @Service
 public class LectureService {
 
+    private final AsyncService asyncService;
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
     private final QuizRepository quizRepository;
@@ -74,6 +75,9 @@ public class LectureService {
 
     @Transactional
     public BasicResponseDto<KeywordResponseDto> makeKeyword(Long lectureId) {
+
+        List<Quiz> quizList = new ArrayList<>();
+
         Optional<Lecture> optional = lectureRepository.findById(lectureId);
         if (optional.isEmpty()) {
             return null;
@@ -91,10 +95,11 @@ public class LectureService {
         for (String keyword : keywords) {
             Quiz quiz = Quiz.builder().word(keyword).build();
             quiz.setLecture(lecture);
-            quizRepository.save(quiz);
-
-            keywordResponseDto.getKeywordList().add(new KeywordDto(quiz.getWord(), quiz.getMeaning()));
+            quizList.add(quizRepository.save(quiz));
         }
+
+        asyncService.setKeywordInfo(quizList);
+        quizList.forEach(quiz -> keywordResponseDto.getKeywordList().add(new KeywordDto(quiz.getWord(), quiz.getMeaning())));
         lecture.updateHasKey(true);
         return new BasicResponseDto<>(BasicResponseDto.SUCCESS, BasicResponseDto.KEYWORD, keywordResponseDto);
     }

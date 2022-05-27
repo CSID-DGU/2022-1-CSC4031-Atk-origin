@@ -39,13 +39,14 @@ public class Lecture extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "lecture")
+    @OneToMany(mappedBy = "lecture", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Quiz> quizzes = new ArrayList<>();
 
     @Builder
-    public Lecture(String title, String content) {
+    public Lecture(String title, String content, String translation) {
         this.titie = title;
         this.content = content;
+        this.translation = translation;
     }
 
     public void setUser(User user) {

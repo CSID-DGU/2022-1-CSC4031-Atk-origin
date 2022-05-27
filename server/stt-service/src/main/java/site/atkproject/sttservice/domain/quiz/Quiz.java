@@ -23,6 +23,7 @@ public class Quiz extends BaseTimeEntity {
 
     private String word;
     private String meaning;
+    private String definition;
     private String synonym;
     private String antonym;
     private String example;

@@ -54,7 +54,7 @@ services:
       - ~/app/stt/files:/root/app/stt/files
   
   fastapi:
-    image: hsj4665/atk-fastapi:0.2
+    image: hsj4665/atk-fast-mac:0.1
     container_name: atk-fastapi
     ports:
       - 8000:8000

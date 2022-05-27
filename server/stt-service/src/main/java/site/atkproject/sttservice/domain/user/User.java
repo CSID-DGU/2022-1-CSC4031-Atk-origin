@@ -26,7 +26,7 @@ public class User extends BaseTimeEntity {
     private String password;
     private String roles;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Lecture> lectures = new ArrayList<>();
 
     public List<String> getRoleList() {
