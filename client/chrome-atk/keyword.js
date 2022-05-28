@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let cnt = 0;
         console.log("show keywords");
         for (var i = 0; i < request.keywordList.length; i++) {
-          if(request.keywordList[i].word.trim()) {
+          if(request.keywordList[i].trim()) {
             cnt += 1;
             var newRow = tbodyRef.insertRow();
 
@@ -41,12 +41,12 @@ document.addEventListener('DOMContentLoaded', function() {
             newCell.appendChild(numText);
 
             var wordCell = newRow.insertCell();
-            var wordText = document.createTextNode(request.keywordList[i].word);
+            var wordText = document.createTextNode(request.keywordList[i]);
             wordCell.appendChild(wordText);
             
-            var meaningCell = newRow.insertCell();
-            var meaningText = document.createTextNode('없음');
-            meaningCell.appendChild(meaningText);
+            //var meaningCell = newRow.insertCell();
+            //var meaningText = document.createTextNode('없음');
+            //meaningCell.appendChild(meaningText);
 
             newRow.onclick = function(evt) {
               var cells = this.getElementsByTagName('td');

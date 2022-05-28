@@ -415,7 +415,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     var transcriptUrl = "api/lecture/" + request.lectureId;
     getJson(transcriptUrl);
   } else if(request.name === 'getKeywords') {
-    var url = "api/lecture/" + request.lectureId + "/keyword";
+    var url = "api/quiz/" + request.lectureId;
     getJson(url);
   } else if(request.name === 'getList') {
     chrome.storage.sync.get('lectures', function (result) {
@@ -581,7 +581,29 @@ const onResponse = function(req, url) {
   } else if(url.toLowerCase().includes("lecture") === true) {
     const obj = JSON.parse(req.responseText);
     printList(obj.extraResult);
+  } else if(url.toLowerCase().includes("quiz") === true) {
+    const obj = JSON.parse(req.responseText);
+    generateQuiz(obj.extraResult);
   }
+}
+
+const generateQuiz = function(data) {
+  chrome.storage.sync.set({words: data}, function () {
+    chrome.storage.sync.get('words', function (result) {
+      console.log(result);
+      //chrome.runtime.sendMessage({name:"printLectureList", lectureList: result });
+      let arrKeywords = [];
+      for(var i=0; i<result.length; i++){
+        if(result[i].definition){
+          arrKeywords.push(result[i].word);
+          console.log("keywords :" + result[i].word);
+        }
+      }
+      console.log("keywords :" + arrKeywords);
+      chrome.runtime.sendMessage({name: "printKeywords", keywordList: arrKeywords});
+    });
+  });
+  //chrome.runtime.sendMessage({name: "printTranscript", transcript: data});
 }
 
 const printTranscript = function(data) {
