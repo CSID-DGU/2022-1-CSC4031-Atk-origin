@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const tbodyRef = document.getElementById('keywordTable').getElementsByTagName('tbody')[0];
     const nextButton = document.getElementById('next');
+    const backButton = document.getElementById('back');
     const loading = document.getElementById('loading');
     const heading = document.getElementById('heading');
     const container = document.getElementById('container');
@@ -12,7 +13,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // nextButton.style.display = 'block';
     // loading.style.display = 'none';
 
-    nextButton.onclick = () => {window.location.href="quiz.html?quizType=vocab&num=1"};
+    const startQuiz = function() {
+      quizArr = [];
+      chrome.storage.sync.get('words', function (result) {
+        for(var i=0; i< result.words.length; i++) {
+          quizArr.push({type: "", answer: "", isCorrect: false, multipleChoice: []});
+        }
+        chrome.storage.sync.set({quiz: quizArr});
+      });
+      window.location.href="quiz.html?num=0";
+    }
+
+    nextButton.onclick = () =>{startQuiz()};
+    backButton.onclick = () =>{window.location.href="popup.html"};
     
     const showKeywords = function(arr) {
       let cnt = 0;
