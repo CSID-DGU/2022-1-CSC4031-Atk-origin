@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const id = urlParams.get('lectureId')
     chrome.extension.sendMessage({name: 'getTranscript', lectureId: id});
 
-    studyButton.onclick = () => {window.location.href="keyword.html?lectureId=" + id};
+    studyButton.onclick = () => {window.location.href="keyword.html?lectureId=" + id + "&reload=true"};
     deleteButton.onclick = () => {chrome.extension.sendMessage({name: 'deleteLecture', lectureId: id})};
     // const showDemo = function() {
     //   for(var i=0; i<100; i++) {

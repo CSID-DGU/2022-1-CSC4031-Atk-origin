@@ -415,7 +415,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
     var transcriptUrl = "api/lecture/" + request.lectureId;
     getJson(transcriptUrl);
   } else if(request.name === 'getKeywords') {
-    var url = "api/quiz/" + request.lectureId;
+    var url = "api/lecture/" + request.lectureId + "/keyword";
     getJson(url);
   } else if(request.name === 'getList') {
     chrome.storage.sync.get('lectures', function (result) {
@@ -430,6 +430,9 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
   } else if(request.name === 'deleteLecture') {
     var url = "api/lecture/" + request.lectureId;
     deleteLecture(url);
+  } else if(request.name === 'getQuiz') {
+    var url = "api/quiz/" + request.lectureId;
+    getJson(url);
   }
   return true;
 });
@@ -588,22 +591,17 @@ const onResponse = function(req, url) {
 }
 
 const generateQuiz = function(data) {
-  chrome.storage.sync.set({words: data}, function () {
+  let arrKeywords = [];
+  for(var i=0; i<data.length; i++){
+    if(data[i].definition){
+      arrKeywords.push(data[i]);
+    }
+  }
+  chrome.storage.sync.set({words: arrKeywords}, function () {
     chrome.storage.sync.get('words', function (result) {
-      console.log(result);
-      //chrome.runtime.sendMessage({name:"printLectureList", lectureList: result });
-      let arrKeywords = [];
-      for(var i=0; i<result.length; i++){
-        if(result[i].definition){
-          arrKeywords.push(result[i].word);
-          console.log("keywords :" + result[i].word);
-        }
-      }
-      console.log("keywords :" + arrKeywords);
-      chrome.runtime.sendMessage({name: "printKeywords", keywordList: arrKeywords});
+      chrome.runtime.sendMessage({name: "printDictionary", keywordList: result.words});
     });
   });
-  //chrome.runtime.sendMessage({name: "printTranscript", transcript: data});
 }
 
 const printTranscript = function(data) {

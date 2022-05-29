@@ -53,6 +53,11 @@ li {
   white-space: nowrap;
 }
 
+b {
+  margin-bottom: 15px;
+  display: block;
+}
+
 .inputContainer {
   display: flex;
   flex-wrap: wrap;
