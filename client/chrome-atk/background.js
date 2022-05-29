@@ -430,6 +430,9 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
   } else if(request.name === 'deleteLecture') {
     var url = "api/lecture/" + request.lectureId;
     deleteLecture(url);
+  } else if(request.name === 'getQuiz') {
+    var url = "api/quiz/" + request.lectureId;
+    getJson(url);
   }
   return true;
 });
@@ -581,7 +584,24 @@ const onResponse = function(req, url) {
   } else if(url.toLowerCase().includes("lecture") === true) {
     const obj = JSON.parse(req.responseText);
     printList(obj.extraResult);
+  } else if(url.toLowerCase().includes("quiz") === true) {
+    const obj = JSON.parse(req.responseText);
+    generateQuiz(obj.extraResult);
   }
+}
+
+const generateQuiz = function(data) {
+  let arrKeywords = [];
+  for(var i=0; i<data.length; i++){
+    if(data[i].definition){
+      arrKeywords.push(data[i]);
+    }
+  }
+  chrome.storage.sync.set({words: arrKeywords}, function () {
+    chrome.storage.sync.get('words', function (result) {
+      chrome.runtime.sendMessage({name: "printDictionary", keywordList: result.words});
+    });
+  });
 }
 
 const printTranscript = function(data) {
