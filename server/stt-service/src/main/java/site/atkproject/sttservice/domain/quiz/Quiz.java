@@ -34,9 +34,13 @@ public class Quiz extends BaseTimeEntity {
     private Lecture lecture;
 
     @Builder
-    public Quiz(String word, String meaning) {
+    public Quiz(String word, String meaning, String definition, String synonym, String antonym, String example) {
         this.word = word;
         this.meaning = meaning;
+        this.definition = definition;
+        this.synonym = synonym;
+        this.antonym = antonym;
+        this.example = example;
     }
 
     public void setLecture(Lecture lecture) {

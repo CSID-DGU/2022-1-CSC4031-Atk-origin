@@ -2,8 +2,6 @@ package site.atkproject.sttservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.atkproject.sttservice.domain.lecture.Lecture;
@@ -27,7 +25,7 @@ import java.util.Optional;
 @Service
 public class LectureService {
 
-    private final AsyncService asyncService;
+    private final PythonService pythonService;
     private final UserRepository userRepository;
     private final LectureRepository lectureRepository;
     private final QuizRepository quizRepository;
@@ -64,7 +62,7 @@ public class LectureService {
         Lecture lecture = optional.get();
         String translatedText = lecture.getTranslation();
         if (lecture.getTranslation() != null) {
-             result = new TranslationResponseDto(lectureId, translatedText);
+            result = new TranslationResponseDto(lectureId, translatedText);
             return new BasicResponseDto<>(BasicResponseDto.SUCCESS, BasicResponseDto.TRANSLATED, result);
         }
         translatedText = translation.translate(lecture.getContent());
@@ -77,6 +75,7 @@ public class LectureService {
     public BasicResponseDto<KeywordResponseDto> makeKeyword(Long lectureId) {
 
         List<Quiz> quizList = new ArrayList<>();
+        List<Quiz.QuizBuilder> quizBuilders = new ArrayList<>();
 
         Optional<Lecture> optional = lectureRepository.findById(lectureId);
         if (optional.isEmpty()) {
@@ -93,12 +92,20 @@ public class LectureService {
         String content = lecture.getContent();
         String[] keywords = keyword.separateWords(content);
         for (String keyword : keywords) {
-            Quiz quiz = Quiz.builder().word(keyword).build();
+            PythonKeywordResponseDto keywordInfo = pythonService.getKeywordInfo(keyword);
+            Quiz quiz;
+            Quiz.QuizBuilder quizBuilder = Quiz.builder().word(keyword);
+            if (keywordInfo != null) {
+                quizBuilder.definition(keywordInfo.getDefinition())
+                        .antonym(keywordInfo.getAntonym())
+                        .example(keywordInfo.getExample());
+            }
+
+            quiz = quizBuilder.build();
             quiz.setLecture(lecture);
             quizList.add(quizRepository.save(quiz));
         }
 
-        asyncService.setKeywordInfo(quizList);
         quizList.forEach(quiz -> keywordResponseDto.getKeywordList().add(new KeywordDto(quiz.getWord(), quiz.getMeaning())));
         lecture.updateHasKey(true);
         return new BasicResponseDto<>(BasicResponseDto.SUCCESS, BasicResponseDto.KEYWORD, keywordResponseDto);

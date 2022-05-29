@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import site.atkproject.sttservice.domain.quiz.Quiz;
 import site.atkproject.sttservice.util.FastApi;
-import site.atkproject.sttservice.util.keyword.impl.KeywordClient;
+import site.atkproject.sttservice.util.stt.impl.SttClient;
+import site.atkproject.sttservice.web.dto.response.PythonKeywordListResponseDto;
+import site.atkproject.sttservice.web.dto.response.PythonKeywordResponseDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +19,23 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class AsyncService {
+public class PythonService {
 
     private final FastApi fastApi;
 
-    @Async
-    public void setKeywordInfo(List<Quiz> quizList) {
+    public PythonKeywordResponseDto getKeywordInfo(String keyword) {
+        return fastApi.webClient.get().
+                uri(uriBuilder -> uriBuilder
+                        .path("/api/keyword-info")
+                        .queryParam("keyword", keyword)
+                        .build())
+                .retrieve()
+                .bodyToMono(PythonKeywordResponseDto.class)
+                .block();
+    }
+
+//    @Async
+    public PythonKeywordListResponseDto setKeywordInfo(List<Quiz> quizList) {
         List<List<String>> quiz = new ArrayList<>();
         quizList.forEach(quiz1 -> {
             List<String> list = new ArrayList<>();
@@ -33,9 +46,8 @@ public class AsyncService {
 
         KeywordListRequestDto keywordListRequestDto = new KeywordListRequestDto(quiz);
         System.out.println(keywordListRequestDto);
-        String block = fastApi.webClient.post().uri("/api/keyword-info").body(Mono.just(keywordListRequestDto), KeywordListRequestDto.class)
-                .retrieve().bodyToMono(String.class).block();
-        System.out.println(block);
+        return fastApi.webClient.post().uri("/api/keyword-info").body(Mono.just(keywordListRequestDto), KeywordListRequestDto.class)
+                .retrieve().bodyToMono(PythonKeywordListResponseDto.class).block();
     }
 
     @Data
