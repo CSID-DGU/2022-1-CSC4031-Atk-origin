@@ -14,6 +14,7 @@ public class PythonKeywordListResponseDto {
     @Data
     public static class Keyword {
         private Long id;
+        private String meaning;
         private String definition;
         private String synonyms;
         private String antonym;

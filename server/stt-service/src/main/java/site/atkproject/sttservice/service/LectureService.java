@@ -47,7 +47,7 @@ public class LectureService {
         List<Lecture> lectures = lectureRepository.findAllByUser(user);
         List<LectureListResponseDto> lectureListResponseDtoList = new ArrayList<>();
         lectures.forEach(lecture -> {
-            lectureListResponseDtoList.add(new LectureListResponseDto(lecture.getId(), lecture.getTitie(), lecture.getCreatedDate()));
+            lectureListResponseDtoList.add(new LectureListResponseDto(lecture.getId(), lecture.getTitie(), lecture.getCreatedDate(), lecture.getScore()));
         });
         return new BasicResponseDto<>(BasicResponseDto.SUCCESS, BasicResponseDto.LECTURE, lectureListResponseDtoList);
     }
@@ -97,6 +97,8 @@ public class LectureService {
             Quiz.QuizBuilder quizBuilder = Quiz.builder().word(keyword);
             if (keywordInfo != null) {
                 quizBuilder.definition(keywordInfo.getDefinition())
+                        .meaning(keywordInfo.getMeaning())
+                        .synonym(keywordInfo.getSynonyms())
                         .antonym(keywordInfo.getAntonym())
                         .example(keywordInfo.getExample());
             }

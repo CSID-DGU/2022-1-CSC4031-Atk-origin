@@ -26,6 +26,7 @@ public class Quiz extends BaseTimeEntity {
     private String definition;
     private String synonym;
     private String antonym;
+    @Lob
     private String example;
 
     @JsonIgnore
