@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            if(result.quiz[idx].answer === "") {
+            if(result.quiz[idx].type === "") {
                 if(synonymArr.length >= 3 && item.antonym && multipleCnt < cnt) {
                     let multipleChoice = synonymArr.sort(() => Math.random() - 0.5).slice(0, 3);
                     multipleChoice.push(item.antonym);
