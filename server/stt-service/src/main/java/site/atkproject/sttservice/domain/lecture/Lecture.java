@@ -35,6 +35,9 @@ public class Lecture extends BaseTimeEntity {
     @ColumnDefault(value = "0")
     private Boolean hasKeyword;
 
+    @ColumnDefault(value = "0")
+    private Integer score;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
