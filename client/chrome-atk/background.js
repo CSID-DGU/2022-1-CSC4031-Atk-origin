@@ -390,6 +390,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
     const url = "api/user/" + request.type;
     var data = JSON.stringify({username: request.name, password: request.pw});
+    resetDashboard();
     loginReq(url, data);
   } else if (request.type === "logOut") {
     logOut();
@@ -489,14 +490,17 @@ const deleteLecture = function(url) {
         console.log("[LOG] received response from " + url + ": " + this.responseText);
         if (this.status === 200) {
           console.log('success');
-          var emptyArr = [];
-          chrome.storage.sync.set({lectures: emptyArr}, function () {
-            chrome.runtime.sendMessage("deleteSuccess"); 
-          });
+          resetDashboard();
+          chrome.runtime.sendMessage("deleteSuccess");
         }
       }
     }
   });
+}
+
+const resetDashboard = function() {
+  var emptyArr = [];
+  chrome.storage.sync.set({lectures: emptyArr});
 }
 
 const sendJson = function(url, data) {
