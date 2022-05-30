@@ -17,7 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const num = urlParams.get('num');
     const idx = parseInt(num);
-
+    
+    blankForm.innerHTML = "";
+    
     const processAnswer = function() {
         chrome.storage.sync.get('quiz', function (result) {
             let arrQuiz = result.quiz;
@@ -51,6 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const showResult = function() {
+        processAnswer();
         chrome.storage.sync.get('words', function (data) {
             chrome.storage.sync.get('quiz', function (result) {
                 let correctCnt = 0;
@@ -131,9 +134,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     vocabForm.style.display="flex";
                     multipleForm.style.display="none";
                     blankForm.style.display="block";
-                    blankForm.innerHTML = item.example.replace(item.word, "______");;
                     question.innerHTML+="빈칸에 들어갈 말은?";
-    
+                    
+                    exampleArr = item.example.split('|');
+                    for(var i=0;i<exampleArr.length;i++) {
+                        blankForm.innerHTML += exampleArr[i].replace(item.word, "______") + " ";
+                    }
+
                     let tempArr = result.quiz;
                     tempArr[idx].type = "blank";
                     chrome.storage.sync.set({quiz: tempArr});
@@ -169,7 +176,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     multipleForm.style.display="none";
                     blankForm.style.display="block";
 
-                    blankForm.innerHTML = item.example.replace(item.word, "______");;
+                    exampleArr = item.example.split('|');
+                    for(var i=0;i<exampleArr.length;i++) {
+                        blankForm.innerHTML += exampleArr[i].replace(item.word, "______") + " ";
+                    }
+
                     question.innerHTML+="빈칸에 들어갈 말은?";
                     inputBox.value = result.quiz[idx].answer;
                 } else {
