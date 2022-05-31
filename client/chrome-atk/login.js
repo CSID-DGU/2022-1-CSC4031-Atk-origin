@@ -19,6 +19,24 @@ document.addEventListener('DOMContentLoaded', function() {
   signupButton.onclick = () => {chrome.runtime.sendMessage({type:"join", name:nameInput.value, pw:pwInput.value})};
   cancelButton.onclick = () => {showLogin()};
   signupLink.onclick = () => {showSignUp()};
+  nameInput.addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+      if(loginButton.style.display === 'block') {
+        loginButton.click();
+      } else {
+        signupButton.click();
+      }
+    }
+  });
+  pwInput.addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+      if(loginButton.style.display === 'block') {
+        loginButton.click();
+      } else {
+        signupButton.click();
+      }
+    }
+  });
 
   const showSignUp = function() {
     signupHeading.style.display="block";
