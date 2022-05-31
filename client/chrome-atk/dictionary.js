@@ -41,7 +41,10 @@ document.addEventListener('DOMContentLoaded', function() {
           synText.style.marginBottom = "0px";
           synElement.appendChild(synText);
           for(var j=0; j<synonymArr.length; j++) {
-            synText.textContent += synonymArr[j] + ", ";
+            if(j!=0){
+              synText.textContent += ", ";
+            }
+            synText.textContent += synonymArr[j];
           }
           scrollBox.appendChild(synElement);
         } 
@@ -57,7 +60,10 @@ document.addEventListener('DOMContentLoaded', function() {
           antText.style.marginBottom = "0px";
           antElement.appendChild(antText);
           for(var j=0; j<antonymArr.length; j++) {
-            antText.textContent += antonymArr[j] + ", ";
+            if(j!=0){
+              antText.textContent += ", ";
+            }
+            antText.textContent += antonymArr[j];
           }
           scrollBox.appendChild(antElement);
         } 
