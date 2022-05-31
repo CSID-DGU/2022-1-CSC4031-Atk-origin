@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const id = urlParams.get('lectureId');
   const word = urlParams.get('word');
 
-  backButton.onclick = () => {window.location.href="keyword.html?lectureId=" + id+"reload=false"};
+  backButton.onclick = () => {window.location.href="keyword.html?lectureId=" + id + "reload=false"};
 
   chrome.storage.sync.get('words', function (result) {
     console.log(result.words.length);
@@ -69,6 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } 
 
         if(result.words[i].example) {
+          let exampleArr = result.words[i].example.split('|');
           let exElement = document.createElement("b")
           exElement.textContent = "\u2022 Example";
           let exText = document.createElement("p")
@@ -76,15 +77,11 @@ document.addEventListener('DOMContentLoaded', function() {
           exText.style.marginLeft = "15px";
           exText.style.marginTop = "0px";
           exText.style.marginBottom = "0px";
-          exText.textContent = result.words[i].example;
+          exText.textContent = exampleArr[0];
           exElement.appendChild(exText);
           scrollBox.appendChild(exElement); 
         }
       }
     }
   });
-  
-  chrome.runtime.onMessage.addListener((request, sender) => {
-    
-  });  
 });
