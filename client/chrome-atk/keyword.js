@@ -8,6 +8,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const logo = document.getElementById("logo");
   logo.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get('lectureId')
+  const reload = urlParams.get('reload')
+
   const startQuiz = function() {
     quizArr = [];
     chrome.storage.sync.get('words', function (result) {
@@ -49,11 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const id = urlParams.get('lectureId')
-  const reload = urlParams.get('reload')
-
-  if(reload) {
+  if(reload === 'true') {
     chrome.runtime.sendMessage({name: "getKeywords", lectureId: id});
     heading.style.display = 'none';
     container.style.display = 'none';

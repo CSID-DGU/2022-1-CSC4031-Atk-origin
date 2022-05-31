@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const id = urlParams.get('lectureId');
   const word = urlParams.get('word');
 
-  backButton.onclick = () => {window.location.href="keyword.html?lectureId=" + id + "reload=false"};
+  backButton.onclick = () => {window.location.href="keyword.html?lectureId=" + id + "&reload=false"};
 
   chrome.storage.sync.get('words', function (result) {
     console.log(result.words.length);

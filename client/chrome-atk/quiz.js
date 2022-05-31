@@ -33,16 +33,42 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } else {
                 arrQuiz[idx].answer = inputBox.value;
-            } 
+            }
+            
             if(arrQuiz[idx].answer === arrQuiz[idx].correctAns) {
                 arrQuiz[idx].isCorrect = true;
             } else {
-                arrQuiz[idx].isCorrect = false;
+                if(arrQuiz[idx].type === "blank") {
+                    exampleArr = item.example.split('|');
+                    if(exampleArr.length > 1) {
+                        let seq = 0;
+                        var exampleOriginal = exampleArr[1];
+                        var exampleLemma = exampleArr[0];
+                        
+                        if (exampleOriginal[exampleOriginal.length-1] === ".")
+                            exampleOriginal = exampleOriginal.slice(0,-1);
+                        if (exampleLemma[exampleLemma.length-1] === ".")
+                            exampleLemma = exampleLemma.slice(0,-1);
+                        
+                        let str = exampleOriginal.split(' ');
+                        let lemma = exampleLemma.split(' ');
+                        for(var i=0; i<str.length; i++) {
+                            if(str[i] === item.word){
+                                seq = i;
+                            }
+                        }
+                        if(arrQuiz[idx].answer === lemma[seq]) {
+                            arrQuiz[idx].isCorrect = true;
+                        } else{
+                            arrQuiz[idx].isCorrect = false;
+                        }
+                    } 
+                } else {
+                    arrQuiz[idx].isCorrect = false;
+                }
             }
             chrome.storage.sync.set({quiz: arrQuiz}, function () { 
-                for(var i = 0; i<arrQuiz.length; i++) {
-                    console.log("saved answer: " + arrQuiz[i].answer + " type: " +arrQuiz[i].type  );
-                }
+                console.log("[LOG] saved answer");
             });
         });
     }
@@ -52,17 +78,19 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href="quiz.html?num=" + nextIdx.toString();
     }
 
-    const showResult = function() {
+    const updateScore = function() {
         processAnswer();
-        chrome.storage.sync.get('words', function (data) {
-            chrome.storage.sync.get('quiz', function (result) {
-                let correctCnt = 0;
-                for(var i=0; i<result.quiz.length; i++) {
-                    if(result.quiz[i].isCorrect) {
-                        correctCnt += 1;
-                    }
+        chrome.storage.sync.get('quiz', function (result) {
+            let correctCnt = 0;
+            for(var i=0; i<result.quiz.length; i++) {
+                if(result.quiz[i].isCorrect) {
+                    correctCnt += 1;
                 }
-                window.location.href="result.html?total=" + data.words.length.toString() + "&correct=" + correctCnt;
+            }
+            var percentage = correctCnt / result.quiz.length; 
+            percentage = Math.round(percentage * 100) / 100;
+            chrome.storage.sync.get('lectureId', function (data) {
+                chrome.extension.sendMessage({name: 'updateScore', lectureId: data.lectureId, score: percentage * 100});
             });
         });
     }
@@ -100,13 +128,22 @@ document.addEventListener('DOMContentLoaded', function() {
     logo.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
     nextButton.onclick = () => {showQuestion(idx + 1)};
     backButton.onclick = () => {showQuestion(idx - 1)};
-    submitButton.onclick = () => {showResult()};
+    submitButton.onclick = () => {updateScore()};
     question.innerHTML="Q"+(idx+1).toString()+": ";
     loading.style.display = 'none';
 
     chrome.storage.sync.get('words', function (data) {
         item = data.words[idx];
         const cnt = data.words.length * 0.3;
+        inputBox.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+              if(idx < data.words.length-1) {
+                nextButton.click();
+              } else {
+                submitButton.click();
+              }
+            }
+          });
 
         if(idx === 0) {
             nextButton.style.display = 'block';
@@ -181,4 +218,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    chrome.runtime.onMessage.addListener((request, sender) => {
+        if(request === 'scoreUpdated') {
+            chrome.storage.sync.get('quiz', function (result) {
+                let correctCnt = 0;
+                for(var i=0; i<result.quiz.length; i++) {
+                    if(result.quiz[i].isCorrect) {
+                        correctCnt += 1;
+                    }
+                }
+                window.location.href="result.html?total=" + result.quiz.length.toString() + "&correct=" + correctCnt;
+            });
+        } 
+      });  
 });

@@ -11,14 +11,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const urlParams = new URLSearchParams(window.location.search);
   const page_type = urlParams.get('filter')
 
-  if(page_type==="total") {
-    heading.innerHTML = "Lectures Saved";
-  } else if(page_type==="inProgress") {
-    heading.innerHTML = "Lectures To Study";
-  } else {
-    heading.innerHTML = "Lectures Studied";
-  }
-
   container.style.display = 'block';
   backButton.style.display = 'block';
   loading.style.display = 'none';
@@ -26,68 +18,56 @@ document.addEventListener('DOMContentLoaded', function() {
 
   const showTranscript = function(idx) {
     chrome.storage.sync.get('lectures', function (result) {
-      var sId = result.lectures[idx-1].id;
+      var sId = result.lectures[idx].id;
+      chrome.storage.sync.set({lectureId: sId});
       window.location.href="transcript.html?lectureId="+sId;
     });
   }
 
+  const addRow = function(lecture, idx) {
+    var newRow = tbodyRef.insertRow();
+    
+    var dateCell = newRow.insertCell();
+    var date = document.createTextNode(new Date(lecture.studyDate).toLocaleDateString());
+    dateCell.appendChild(date);
+
+    var titleCell = newRow.insertCell();
+    var titleText = document.createTextNode(lecture.title);
+    titleCell.appendChild(titleText);
+    
+    var scoreCell = newRow.insertCell();
+    var scoreText = document.createTextNode(lecture.score);
+    scoreCell.appendChild(scoreText);
+
+    newRow.onclick = function(evt) {
+      showTranscript(idx);
+    };
+  }
+
   const printList = function() {
     chrome.storage.sync.get('lectures', function (result) {
-      for (var i = 0; i < result.lectures.length; i++) {
-        var newRow = tbodyRef.insertRow();
-        var newCell = newRow.insertCell();
-        var date = document.createTextNode(new Date(result.lectures[i].studyDate).toLocaleDateString());
-        newCell.appendChild(date);
-  
-        var wordCell = newRow.insertCell();
-        var wordText = document.createTextNode(result.lectures[i].title);
-        wordCell.appendChild(wordText);
-        
-        var meaningCell = newRow.insertCell();
-        var meaningText = document.createTextNode(0);
-        meaningCell.appendChild(meaningText);
-
-        newRow.onclick = function(evt) {
-          console.log(this.rowIndex);
-          showTranscript(this.rowIndex);
-        };
+      if(page_type==="total") {
+        heading.innerHTML = "Lectures Saved";
+        for (var i = 0; i < result.lectures.length; i++) {
+          addRow(result.lectures[i], i);
+        }
+      } else if(page_type==="inProgress") {
+        heading.innerHTML = "Lectures To Study";
+        for (var i = 0; i < result.lectures.length; i++) {
+          if(result.lectures[i].score <= 0) {
+            addRow(result.lectures[i], i);
+          }
+        }
+      } else {
+        heading.innerHTML = "Lectures Studied";
+        for (var i = 0; i < result.lectures.length; i++) {
+          if(result.lectures[i].score > 0) {
+            addRow(result.lectures[i], i);
+          }
+        }
       }
     });
   }
-
-  // heading.style.display = 'none';
-  // container.style.display = 'none';
-  // backButton.style.display = 'none';
-  // loading.style.display = 'block';
-
+  
   printList();
-
-  chrome.runtime.onMessage.addListener((request, sender) => {
-    if(request.name === 'printKeywords') {
-      heading.style.display = 'block';
-      container.style.display = 'block';
-      backButton.style.display = 'block';
-      loading.style.display = 'none';
-      let cnt = 0;
-      console.log("show keywords");
-      for (var i = 0; i < request.keywordList.length; i++) {
-        if(request.keywordList[i].word != "") {
-          cnt += 1;
-          var newRow = tbodyRef.insertRow();
-
-          var newCell = newRow.insertCell();
-          var numText = document.createTextNode(cnt);
-          newCell.appendChild(numText);
-
-          var wordCell = newRow.insertCell();
-          var wordText = document.createTextNode(request.keywordList[i].word);
-          wordCell.appendChild(wordText);
-          
-          var meaningCell = newRow.insertCell();
-          var meaningText = document.createTextNode('없음');
-          meaningCell.appendChild(meaningText);
-        }
-      }
-    }
-  });     
 });
