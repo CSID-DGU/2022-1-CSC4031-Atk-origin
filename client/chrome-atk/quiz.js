@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     blankForm.innerHTML = "";
     
-    const processAnswer = function() {
+    const processAnswer = function(type) {
         chrome.storage.sync.get('quiz', function (result) {
             let arrQuiz = result.quiz;
 
@@ -67,19 +67,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     arrQuiz[idx].isCorrect = false;
                 }
             }
-            chrome.storage.sync.set({quiz: arrQuiz}, function () { 
-                console.log("[LOG] saved answer");
+            chrome.extension.sendMessage({name: 'setQuizCookie', questions: arrQuiz, action: type}, function(response) {
+                if(response.action === "next"){
+                    window.location.href="quiz.html?num=" + (idx + 1).toString();
+                } else if(response.action === "prior"){
+                    window.location.href="quiz.html?num=" + (idx - 1).toString();
+                } else {
+                    updateScore();
+                }
             });
         });
     }
 
-    const showQuestion = function(nextIdx) {
-        processAnswer();
-        window.location.href="quiz.html?num=" + nextIdx.toString();
-    }
-
     const updateScore = function() {
-        processAnswer();
         chrome.storage.sync.get('quiz', function (result) {
             let correctCnt = 0;
             for(var i=0; i<result.quiz.length; i++) {
@@ -88,9 +88,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             var percentage = correctCnt / result.quiz.length; 
-            percentage = Math.round(percentage * 100) / 100;
+            percentage = Math.round(percentage * 100);
             chrome.storage.sync.get('lectureId', function (data) {
-                chrome.extension.sendMessage({name: 'updateScore', lectureId: data.lectureId, score: percentage * 100});
+                chrome.extension.sendMessage({name: 'updateScore', lectureId: data.lectureId, score: percentage});
             });
         });
     }
@@ -126,9 +126,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     logo.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
-    nextButton.onclick = () => {showQuestion(idx + 1)};
-    backButton.onclick = () => {showQuestion(idx - 1)};
-    submitButton.onclick = () => {updateScore()};
+    nextButton.onclick = () => {processAnswer("next")};
+    backButton.onclick = () => {processAnswer("prior")};
+    submitButton.onclick = () => {processAnswer("submit")};
     question.innerHTML="Q"+(idx+1).toString()+": ";
     loading.style.display = 'none';
 
