@@ -72,6 +72,10 @@ public class Lecture extends BaseTimeEntity {
         this.translation = text;
     }
 
+    public void updateScore(int score) {
+        this.score = score;
+    }
+
     @PrePersist
     public void prePersist() {
         this.content = this.content == null ? "" : this.content;
