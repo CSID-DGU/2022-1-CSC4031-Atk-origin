@@ -403,6 +403,11 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
       sendResponse({ username: data.username, password: data.password, authorization: data.authorization });
       console.log("Login Cookie loaded - username: " + data.username + " password: "+ data.password + " authorization: " + data.authorization);
     });
+  } if (request.name == 'setQuizCookie') {
+    chrome.storage.sync.set({quiz: request.questions}, function () { 
+      console.log("[LOG] saved answer");
+      sendResponse({ action: request.action });
+    });
   } else if(request.name === 'getStatus') {
     sendResponse({status: inProgress});
   } else if(request.name === 'getSubtitles') {
