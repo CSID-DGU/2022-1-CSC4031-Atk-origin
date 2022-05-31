@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 submitButton.click();
               }
             }
-          });
+        });
 
         if(idx === 0) {
             nextButton.style.display = 'block';
