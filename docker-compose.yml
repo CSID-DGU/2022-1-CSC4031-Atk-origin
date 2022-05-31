@@ -40,7 +40,7 @@ services:
       - ~/data/mysql-db:/var/lib/mysql
   
   spring:
-    image: hsj4665/atk-spring:0.8
+    image: hsj4665/atk-spring:0.9
     container_name: atk-spring
     ports:
       - 8080:8080
