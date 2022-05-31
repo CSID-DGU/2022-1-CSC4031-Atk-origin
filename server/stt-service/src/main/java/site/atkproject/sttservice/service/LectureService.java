@@ -2,6 +2,7 @@ package site.atkproject.sttservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import site.atkproject.sttservice.domain.lecture.Lecture;
@@ -12,6 +13,7 @@ import site.atkproject.sttservice.domain.user.User;
 import site.atkproject.sttservice.domain.user.UserRepository;
 import site.atkproject.sttservice.util.keyword.Keyword;
 import site.atkproject.sttservice.service.translate.Translation;
+import site.atkproject.sttservice.web.dto.request.LectureUpdateRequestDto;
 import site.atkproject.sttservice.web.dto.response.*;
 
 import java.security.Principal;
@@ -117,5 +119,17 @@ public class LectureService {
     public BasicResponseDto<Void> removeLecture(Long lectureId) {
         lectureRepository.deleteById(lectureId);
         return new BasicResponseDto<>(BasicResponseDto.DELETE, BasicResponseDto.LECTURE, null);
+    }
+
+    @Transactional
+    public BasicResponseDto<Integer> updateScore(Long lectureId, LectureUpdateRequestDto requestDto) {
+        Optional<Lecture> optional = lectureRepository.findById(lectureId);
+        if (optional.isEmpty()) {
+            throw new IllegalArgumentException("요청한 강의가 없습니다.");
+        }
+        Lecture lecture = optional.get();
+        int score = requestDto.getScore();
+        lecture.updateScore(score);
+        return new BasicResponseDto<Integer>(BasicResponseDto.SUCCESS, BasicResponseDto.LECTURE, score);
     }
 }
