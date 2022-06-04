@@ -403,6 +403,11 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
       sendResponse({ username: data.username, password: data.password, authorization: data.authorization });
       console.log("Login Cookie loaded - username: " + data.username + " password: "+ data.password + " authorization: " + data.authorization);
     });
+  } if (request.name == 'setQuizCookie') {
+    chrome.storage.sync.set({quiz: request.questions}, function () { 
+      console.log("[LOG] saved answer");
+      sendResponse({ action: request.action });
+    });
   } else if(request.name === 'getStatus') {
     sendResponse({status: inProgress});
   } else if(request.name === 'getSubtitles') {
@@ -434,6 +439,10 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
   } else if(request.name === 'getQuiz') {
     var url = "api/quiz/" + request.lectureId;
     getJson(url);
+  } else if(request.name === 'updateScore') {
+    var url = "api/lecture/" + request.lectureId;
+    var data = JSON.stringify({score: request.score});
+    patchJson(url, data);
   }
   return true;
 });
@@ -568,28 +577,39 @@ const getJson = function(url) {
   });
 };
 
-const onResponse = function(req, url) {
-  if(url.toLowerCase().includes("stt") === true){
-    if(req.status === 200) {
-      const obj = JSON.parse(req.responseText);
-      console.log("[LOG] lecture id is " + obj.extraResult.id);
-      chrome.storage.sync.set({lectureId: obj.extraResult.id});
-      startCapture();
+const patchJson = function(url, score) {
+  console.log("[LOG] sending request to " + url);
+  const req = new XMLHttpRequest();
+  const reqUrl = serverUrl + url;
+  req.open("PATCH", reqUrl, true);
+  chrome.storage.sync.get(function(data) {
+    req.setRequestHeader("Content-type", "application/json;charset=utf-8");
+    req.setRequestHeader("Authorization", data.authorization);
+    req.send(score);
+    req.onreadystatechange = function() { 
+      if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+        console.log("[LOG] received response from " + url + ": " + this.responseText);
+        resetDashboard();
+        chrome.runtime.sendMessage("scoreUpdated");
+      }
     }
+  });
+};
+
+const onResponse = function(req, url) {
+  const obj = JSON.parse(req.responseText);
+  if(url.toLowerCase().includes("stt") === true){
+    chrome.storage.sync.set({lectureId: obj.extraResult.id});
+    startCapture();
   } else if(url.toLowerCase().includes("translate") === true){
-    const obj = JSON.parse(req.responseText);
-    printTranslated(obj.extraResult.translatedText);
+    chrome.runtime.sendMessage({name: "printTranslated", translated: obj.extraResult.translatedText});
   } else if(url.toLowerCase().includes("keyword") === true) {
-    const obj = JSON.parse(req.responseText);
-    printKeywords(obj.extraResult.keywordList);
+    chrome.runtime.sendMessage({name: "printKeywords", keywordList: obj.extraResult.keywordList});
   } else if(url.toLowerCase().includes("lecture/") === true) {
-    const obj = JSON.parse(req.responseText);
-    printTranscript(obj.extraResult.content);
+    chrome.runtime.sendMessage({name: "printTranscript", transcript: obj.extraResult.content});
   } else if(url.toLowerCase().includes("lecture") === true) {
-    const obj = JSON.parse(req.responseText);
     printList(obj.extraResult);
   } else if(url.toLowerCase().includes("quiz") === true) {
-    const obj = JSON.parse(req.responseText);
     generateQuiz(obj.extraResult);
   }
 }
@@ -606,18 +626,6 @@ const generateQuiz = function(data) {
       chrome.runtime.sendMessage({name: "printDictionary", keywordList: result.words});
     });
   });
-}
-
-const printTranscript = function(data) {
-  chrome.runtime.sendMessage({name: "printTranscript", transcript: data});
-}
-
-const printTranslated = function(data) {
-  chrome.runtime.sendMessage({name: "printTranslated", translated: data});
-}
-
-const printKeywords = function(list) {
-  chrome.runtime.sendMessage({name: "printKeywords", keywordList: list});
 }
 
 const printList = function(data) {

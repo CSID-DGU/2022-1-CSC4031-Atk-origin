@@ -20,64 +20,130 @@ document.addEventListener('DOMContentLoaded', function() {
     
     blankForm.innerHTML = "";
     
-    const processAnswer = function() {
+    const processAnswer = function(type) {
         chrome.storage.sync.get('quiz', function (result) {
             let arrQuiz = result.quiz;
-            
-            for(var i = 0; i<result.quiz.length; i++){
-                console.log((i+1).toString() + ". answer: " + result.quiz[i].answer + " type: " + result.quiz[i].type + " correct?: " + result.quiz[i].isCorrect.toString() + " choices : " + result.quiz[i].multipleChoice);
-            }
+
             if(arrQuiz[idx].type === "multiple") {
-                arrQuiz[idx].answer = document.getElementById('rates').value; 
-                if(arrQuiz[idx].answer === item.antonym) {
-                    arrQuiz[idx].isCorrect = true;
-                }
-            } else if(arrQuiz[idx].type === "blank") {
-                if(inputBox.value === item.word) {
-                    arrQuiz[idx].isCorrect = true;
-                }
-                arrQuiz[idx].answer = inputBox.value;
-            } else {
-                if(inputBox.value === item.word) {
-                    arrQuiz[idx].isCorrect = true;
-                }
-                arrQuiz[idx].answer = inputBox.value;
-            }
-            chrome.storage.sync.set({quiz: arrQuiz}, function () { });
-        });
-    }
-
-    const showQuestion = function(nextIdx) {
-        processAnswer();
-        window.location.href="quiz.html?num=" + nextIdx.toString();
-    }
-
-    const showResult = function() {
-        processAnswer();
-        chrome.storage.sync.get('words', function (data) {
-            chrome.storage.sync.get('quiz', function (result) {
-                let correctCnt = 0;
-                for(var i=0; i<result.quiz.length; i++) {
-                    if(result.quiz[i].isCorrect) {
-                        correctCnt += 1;
+                for(var i = 0; i<inputArr.length; i++) {
+                    if(inputArr[i].checked) {
+                        arrQuiz[idx].answer = inputArr[i].value;
+                        break;
                     }
                 }
-                window.location.href="result.html?total=" + data.words.length.toString() + "&correct=" + correctCnt;
+            } else {
+                arrQuiz[idx].answer = inputBox.value;
+            }
+            
+            if(arrQuiz[idx].answer === arrQuiz[idx].correctAns) {
+                arrQuiz[idx].isCorrect = true;
+            } else {
+                if(arrQuiz[idx].type === "blank") {
+                    exampleArr = item.example.split('|');
+                    if(exampleArr.length > 1) {
+                        let seq = 0;
+                        var exampleOriginal = exampleArr[1];
+                        var exampleLemma = exampleArr[0];
+                        
+                        if (exampleOriginal[exampleOriginal.length-1] === ".")
+                            exampleOriginal = exampleOriginal.slice(0,-1);
+                        if (exampleLemma[exampleLemma.length-1] === ".")
+                            exampleLemma = exampleLemma.slice(0,-1);
+                        
+                        let str = exampleOriginal.split(' ');
+                        let lemma = exampleLemma.split(' ');
+                        for(var i=0; i<str.length; i++) {
+                            if(str[i] === item.word){
+                                seq = i;
+                            }
+                        }
+                        if(arrQuiz[idx].answer === lemma[seq]) {
+                            arrQuiz[idx].isCorrect = true;
+                        } else{
+                            arrQuiz[idx].isCorrect = false;
+                        }
+                    } 
+                } else {
+                    arrQuiz[idx].isCorrect = false;
+                }
+            }
+            chrome.extension.sendMessage({name: 'setQuizCookie', questions: arrQuiz, action: type}, function(response) {
+                if(response.action === "next"){
+                    window.location.href="quiz.html?num=" + (idx + 1).toString();
+                } else if(response.action === "prior"){
+                    window.location.href="quiz.html?num=" + (idx - 1).toString();
+                } else {
+                    updateScore();
+                }
             });
         });
     }
 
-    loading.style.display = 'none';
+    const updateScore = function() {
+        chrome.storage.sync.get('quiz', function (result) {
+            let correctCnt = 0;
+            for(var i=0; i<result.quiz.length; i++) {
+                if(result.quiz[i].isCorrect) {
+                    correctCnt += 1;
+                }
+            }
+            var percentage = correctCnt / result.quiz.length; 
+            percentage = Math.round(percentage * 100);
+            chrome.storage.sync.get('lectureId', function (data) {
+                chrome.extension.sendMessage({name: 'updateScore', lectureId: data.lectureId, score: percentage});
+            });
+        });
+    }
+
+    const showMultipleChoice = function(word, choices) {
+        vocabForm.style.display="none";
+        multipleForm.style.display="block";
+        blankForm.style.display="none";
+        for(var i=0; i<inputArr.length; i++) {
+            labelArr[i].innerHTML += choices[i];
+            inputArr[i].value = choices[i];
+        }
+        question.innerHTML += word + "의 유의어가 아닌 것은?";
+    }
+
+    const showFillBlank = function(word, example) {
+        vocabForm.style.display="flex";
+        multipleForm.style.display="none";
+        blankForm.style.display="block";
+        exampleArr = example.split('|');
+        if(exampleArr.length > 1) {
+            blankForm.innerHTML = exampleArr[1].replace(word, "______");
+        }
+        question.innerHTML += "빈칸에 들어갈 말은?";
+    }
+
+    const showVocab = function(definition) {
+        vocabForm.style.display="flex";
+        multipleForm.style.display="none";
+        blankForm.style.display="block";
+        question.innerHTML += "다음 정의에 맞는 단어는?";
+        blankForm.innerHTML = definition;
+    }
 
     logo.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
-    nextButton.onclick = () => {showQuestion(idx + 1)};
-    backButton.onclick = () => {showQuestion(idx - 1)};
-    submitButton.onclick = () => {showResult()};
+    nextButton.onclick = () => {processAnswer("next")};
+    backButton.onclick = () => {processAnswer("prior")};
+    submitButton.onclick = () => {processAnswer("submit")};
     question.innerHTML="Q"+(idx+1).toString()+": ";
+    loading.style.display = 'none';
 
     chrome.storage.sync.get('words', function (data) {
         item = data.words[idx];
         const cnt = data.words.length * 0.3;
+        inputBox.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+              if(idx < data.words.length-1) {
+                nextButton.click();
+              } else {
+                submitButton.click();
+              }
+            }
+        });
 
         if(idx === 0) {
             nextButton.style.display = 'block';
@@ -101,7 +167,6 @@ document.addEventListener('DOMContentLoaded', function() {
         chrome.storage.sync.get('quiz', function (result) {
             let multipleCnt = 0;
             let blankCnt = 0;
-
             for(var i=0; i<result.quiz.length; i++) {
                 if(result.quiz[i].type === "multiple") {
                     multipleCnt += 1;
@@ -112,87 +177,59 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if(result.quiz[idx].type === "") {
                 if(synonymArr.length >= 3 && item.antonym && multipleCnt < cnt) {
-                    let multipleChoice = synonymArr.sort(() => Math.random() - 0.5).slice(0, 3);
-                    multipleChoice.push(item.antonym);
-                    const shuffledArray = multipleChoice.sort(() => Math.random() - 0.5);
-    
-                    vocabForm.style.display="none";
-                    multipleForm.style.display="block";
-                    blankForm.style.display="none";
-    
-                    for(var i=0; i<inputArr.length; i++){
-                        labelArr[i].innerHTML += shuffledArray[i];
-                        inputArr[i].value = shuffledArray[i];
-                    }
-                    question.innerHTML += item.word + "의 유의어가 아닌 것은?";
-    
+                    let choices = synonymArr.sort(() => Math.random() - 0.5).slice(0, 3);
+                    choices.push(item.antonym);
+                    const shuffledArr = choices.sort(() => Math.random() - 0.5);
+                    showMultipleChoice(item.word, shuffledArr);
                     let tempArr = result.quiz;
                     tempArr[idx].type = "multiple";
-                    tempArr[idx].multipleChoice = shuffledArray;
+                    tempArr[idx].correctAns = item.antonym;
+                    tempArr[idx].multipleChoice = shuffledArr;
                     chrome.storage.sync.set({quiz: tempArr});
                 } else if(item.example && blankCnt < cnt) {
-                    vocabForm.style.display="flex";
-                    multipleForm.style.display="none";
-                    blankForm.style.display="block";
-                    question.innerHTML+="빈칸에 들어갈 말은?";
-                    
-                    exampleArr = item.example.split('|');
-                    for(var i=0;i<exampleArr.length;i++) {
-                        blankForm.innerHTML += exampleArr[i].replace(item.word, "______") + " ";
-                    }
-
+                    showFillBlank(item.word, item.example);
                     let tempArr = result.quiz;
+                    tempArr[idx].correctAns = item.word;
                     tempArr[idx].type = "blank";
                     chrome.storage.sync.set({quiz: tempArr});
                 } else {
-                    vocabForm.style.display="flex";
-                    multipleForm.style.display="none";
-                    blankForm.style.display="block";
-                    question.innerHTML+="다음 정의에 맞는 단어는?";
-                    blankForm.innerHTML = item.definition;
-    
+                    showVocab(item.definition);
                     let tempArr = result.quiz;
+                    tempArr[idx].correctAns = item.word;
                     tempArr[idx].type = "vocab";
                     chrome.storage.sync.set({quiz: tempArr});
                 }
             } else {
                 if(result.quiz[idx].type === "multiple") {
-                    const shuffledArray = result.quiz[idx].multipleChoice;
-
-                    vocabForm.style.display="none";
-                    multipleForm.style.display="block";
-                    blankForm.style.display="none";
-    
+                    const shuffledArr = result.quiz[idx].multipleChoice;
+                    showMultipleChoice(item.word, shuffledArr);
                     for(var i=0; i<inputArr.length; i++){
-                        labelArr[i].innerHTML += shuffledArray[i];
-                        inputArr[i].value = shuffledArray[i];
-                        if(shuffledArray[i] === item.antonym) {
+                        if(shuffledArr[i] === result.quiz[idx].answer) {
                             inputArr[i].checked = true;
                         }
                     }
-                    question.innerHTML += item.word + "의 유의어가 아닌 것은?";
                 } else if(result.quiz[idx].type === "blank") {
-                    vocabForm.style.display="flex";
-                    multipleForm.style.display="none";
-                    blankForm.style.display="block";
-
-                    exampleArr = item.example.split('|');
-                    for(var i=0;i<exampleArr.length;i++) {
-                        blankForm.innerHTML += exampleArr[i].replace(item.word, "______") + " ";
-                    }
-
-                    question.innerHTML+="빈칸에 들어갈 말은?";
+                    showFillBlank(item.word, item.example);
                     inputBox.value = result.quiz[idx].answer;
                 } else {
-                    vocabForm.style.display="flex";
-                    multipleForm.style.display="none";
-                    blankForm.style.display="block";
-
-                    question.innerHTML+="다음 정의에 맞는 단어는?";
-                    blankForm.innerHTML = item.definition;
+                    showVocab(item.definition);
                     inputBox.value = result.quiz[idx].answer;
                 }
             }
         });
     });
+
+    chrome.runtime.onMessage.addListener((request, sender) => {
+        if(request === 'scoreUpdated') {
+            chrome.storage.sync.get('quiz', function (result) {
+                let correctCnt = 0;
+                for(var i=0; i<result.quiz.length; i++) {
+                    if(result.quiz[i].isCorrect) {
+                        correctCnt += 1;
+                    }
+                }
+                window.location.href="result.html?total=" + result.quiz.length.toString() + "&correct=" + correctCnt;
+            });
+        } 
+      });  
 });

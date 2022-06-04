@@ -17,8 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const loading = document.getElementById("loading");
 
   logo.onclick = () => {chrome.tabs.create({url: "https://github.com/CSID-DGU/2022-1-CSC4031-Atk-origin"})};
-  const param = "total";
-
+  
   totalPanel.onclick= () => {window.location.href="lecture.html?filter=total"};
   inProgressPanel.onclick= () => {window.location.href="lecture.html?filter=inProgress"};
   completedPanel.onclick= () => {window.location.href="lecture.html?filter=completed"};
@@ -60,7 +59,18 @@ document.addEventListener('DOMContentLoaded', function() {
       progressContainer.style.display = 'block';
       startButton.style.display = 'block';
       logOutButton.style.display = 'block';
-      total.innerHTML = request.lectureList.lectures.length;
+      var lectures = request.lectureList.lectures;
+      total.innerHTML = lectures.length;
+      for(var i=0; i<lectures.length; i++) {
+        if(lectures[i].score > 0) {
+          var cnt = parseInt(completed.innerText);
+          completed.innerText = (cnt += 1).toString();
+        } else {
+          var cnt = parseInt(inProgress.innerText);
+          inProgress.innerText = (cnt += 1).toString();
+        }
+      }
+      
       setPercentage();
     } 
   });
