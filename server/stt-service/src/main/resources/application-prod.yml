@@ -6,7 +6,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MariaDB103Dialect
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
 
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
