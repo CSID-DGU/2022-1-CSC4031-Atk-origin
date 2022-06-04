@@ -90,7 +90,6 @@ public class SttService {
 
     private String getUsername() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username = userDetails.getUsername();
-        return username;
+        return userDetails.getUsername();
     }
 }

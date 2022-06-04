@@ -27,7 +27,6 @@ public class QuizService {
     public List<Quiz> getQuizList(Long lectureId) {
         Lecture lecture = lectureRepository.findById(lectureId).get();
         List<Quiz> quizList = lecture.getQuizzes();
-        log.info("quiz service: {}", quizList);
         return quizList;
     }
 
