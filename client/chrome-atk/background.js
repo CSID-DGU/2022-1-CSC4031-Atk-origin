@@ -1,6 +1,5 @@
 let interval;
-//let serverUrl = "http://ec2-3-39-9-10.ap-northeast-2.compute.amazonaws.com/";
-let serverUrl = "http://localhost:8080/";
+let serverUrl = "http://ec2-15-164-216-235.ap-northeast-2.compute.amazonaws.com/";
 let inProgress = false;
 
 chrome.browserAction.onClicked.addListener(function(tab) {

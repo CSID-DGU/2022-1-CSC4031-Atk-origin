@@ -111,9 +111,12 @@ document.addEventListener('DOMContentLoaded', function() {
         multipleForm.style.display="none";
         blankForm.style.display="block";
         exampleArr = example.split('|');
-        if(exampleArr.length > 1) {
-            blankForm.innerHTML = exampleArr[1].replace(word, "______");
-        }
+        for(var i=0; i < exampleArr.length; i++) {
+            if(exampleArr[i] != ""){
+                blankForm.innerHTML = exampleArr[i].replace(word, "______");
+                break;
+            }
+        }    
         question.innerHTML += "빈칸에 들어갈 말은?";
     }
 
