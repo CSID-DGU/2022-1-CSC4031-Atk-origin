@@ -4,12 +4,11 @@
 - 지승빈(팀장)
 - 지유하
 - 주희수
-- 노현영
 - 홍석주
 
 ## 기술 스택
 
-### Frontent
+### Frontend
 - JavaScript
 
 ### Backend
