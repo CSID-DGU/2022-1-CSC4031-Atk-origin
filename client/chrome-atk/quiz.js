@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         multipleForm.style.display="none";
         blankForm.style.display="block";
         exampleArr = example.split('|');
-        for(var i=0; i < exampleArr.length; i++) {
+        for(var i=1; i < exampleArr.length; i++) {
             if(exampleArr[i] != ""){
                 blankForm.innerHTML = exampleArr[i].replace(word, "______");
                 break;
